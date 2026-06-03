@@ -63,13 +63,13 @@
   "menu.awp.always": "Always",
   "menu.awp.never": "Never",
 
-  "menu.left.image": "<img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/left.gif' class=''>",
-  "menu.right.image": "<img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/right.gif' class=''>",
-  "menu.bottom.text": "<br>           <font color='cyan'>[ WASD - To Native ]</font> <br><font color='purple'>[ <img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - To Exit ]<br>",
-  "menu.bottom.text.pistol": "<font color='purple'>[ <img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - To Exit ]<br>",
+  "menu.left.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/left.gif' class=''>",
+  "menu.right.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/right.gif' class=''>",
+  "menu.bottom.text": "<br>           <font color='cyan'>[ WASD - To Native ]</font> <br><font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - To Exit ]<br>",
+  "menu.bottom.text.pistol": "<font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - To Exit ]<br>",
 
-  "BombSite.A": "<img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/ASITE.png' class=''>",
-  "BombSite.B": "<img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/BSITE.png' class=''>",
+  "BombSite.A": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/ASITE.png' class=''>",
+  "BombSite.B": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/BSITE.png' class=''>",
   "T.Message": "<font color='red'>DEFEND</font> <font color='white'>SITE</font> <font color='red'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
   "CT.Message": "<font color='green'>RETAKE</font> <font color='white'>SITE</font> <font color='green'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
 

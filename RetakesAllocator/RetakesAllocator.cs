@@ -30,8 +30,8 @@ public class RetakesAllocator : BasePlugin
 {
     public override string ModuleName => "Retakes Allocator Plugin";
     public override string ModuleVersion => PluginInfo.Version;
-    public override string ModuleAuthor => "Yoni Lerner, B3none, Gold KingZ";
-    public override string ModuleDescription => "https://github.com/yonilerner/cs2-retakes-allocator";
+    public override string ModuleAuthor => "Yoni Lerner, B3none, Gold KingZ (Forked by Miksen)";
+    public override string ModuleDescription => "https://github.com/mrc4tt/cs2-retakes-allocator";
 
     private readonly AllocatorMenuManager _allocatorMenuManager = new();
     private readonly AdvancedGunMenu _advancedGunMenu = new();

@@ -1,6 +1,6 @@
 ﻿# CS2 Retakes Allocator
 
-[![Build RetakesAllocator.zip](https://github.com/yonilerner/cs2-retakes-allocator/actions/workflows/build.yml/badge.svg)](https://github.com/yonilerner/cs2-retakes-allocator/actions/workflows/build.yml)
+[![Build RetakesAllocator.zip](https://github.com/mrc4tt/cs2-retakes-allocator/actions/workflows/build.yml/badge.svg)](https://github.com/mrc4tt/cs2-retakes-allocator/actions/workflows/build.yml)
 
 ## Retakes
 
@@ -10,7 +10,7 @@ This plugin is made to run alongside B3none's retakes implementation: https://gi
 
 - Ensure you have https://github.com/b3none/cs2-retakes installed already
 - Update the `RetakesPlugin` config to have `EnableFallbackAllocation` disabled
-- Download a release from https://github.com/yonilerner/cs2-retakes-allocator/releases
+- Download a release from https://github.com/mrc4tt/cs2-retakes-allocator/releases
 - Extract the zip archive and upload the `RetakesAllocator` plugin to your CounterStrikeSharp plugins folder on your
   server
     - Each build comes with two necessary runtimes for sqlite3, one for linux64 and one for win64. If you need a
@@ -36,7 +36,7 @@ This plugin relies on some function signatures that:
 - Are not included in the default CS# signatures:
   - `GiveNamedItem2`
 
-Custom game data signatures are maintained in https://github.com/yonilerner/cs2-retakes-allocator/blob/main/Resources/RetakesAllocator_gamedata.json. There are a few ways to keep these up to date on your server:
+Custom game data signatures are maintained in https://github.com/mrc4tt/cs2-retakes-allocator/blob/main/Resources/RetakesAllocator_gamedata.json. There are a few ways to keep these up to date on your server:
 - If you want the plugin to automatically download the signatures, you can do so by running the plugin with the `AutoUpdateSignatures` config set to `true`. **This is the recommended approach**. See more below in the "Configuration" section.
 - If you want to manually download the signatures, you can do so by downloading the `RetakesAllocator_gamedata.json` file from Github and placing it in the `RetakesAllocator/gamedata` folder in the plugin. You may have to create that folder if it does not exist.
 
@@ -348,13 +348,3 @@ You can use the following commands to select specific weapon preferences per-use
 - `!setnextround <P|H|F>` - For admins only. Force the next round to be the selected type.
 - `!reload_allocator_config` - For admins only. Reload the JSON config in-place.
 - `!print_config <name>` - For admins only. Print out the config with the given name.
-
-# Building
-
-To automatically copy the built DLL to your running server location, set the build variable `CopyPath` to the folder
-where the mod should be copied to. *This only works on Windows.*
-
-Notes:
-
-- Run the dedicated server
-  with `start cs2.exe -dedicated -insecure +game_type 0 +game_mode 0 +map de_dust2 +servercfgfile server.cfg`

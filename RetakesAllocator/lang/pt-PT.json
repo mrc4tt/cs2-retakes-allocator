@@ -61,8 +61,8 @@
   "menu.awp.always": "Sempre",
   "menu.awp.never": "Nunca",
 
-  "menu.left.image": "<img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/left.gif' class=''>",
-  "menu.right.image": "<img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/right.gif' class=''>",
-  "menu.bottom.text": "<br>           <font color='cyan'>[ WASD - Para Mover ]</font> <br><font color='purple'>[ <img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - Para Sair ]<br>",
-  "menu.bottom.text.pistol": "<font color='purple'>[ <img src='https://raw.githubusercontent.com/yonilerner/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - Para Sair ]<br>"
+  "menu.left.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/left.gif' class=''>",
+  "menu.right.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/right.gif' class=''>",
+  "menu.bottom.text": "<br>           <font color='cyan'>[ WASD - Para Mover ]</font> <br><font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - Para Sair ]<br>",
+  "menu.bottom.text.pistol": "<font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - Para Sair ]<br>"
 }
