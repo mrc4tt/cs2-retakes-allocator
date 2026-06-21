@@ -4,7 +4,7 @@
   </PropertyGroup>
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CounterStrikeSharp.API" Version="1.0.329" />
+        <PackageReference Include="CounterStrikeSharp.API" Version="1.0.369" />
         <PackageReference Include="RetakesPluginShared" Version="2.0.0" />
     </ItemGroup>
 

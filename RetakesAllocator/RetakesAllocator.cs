@@ -25,7 +25,6 @@ using CounterStrikeSharp.API.Modules.Events;
 
 namespace RetakesAllocator;
 
-[MinimumApiVersion(201)]
 public class RetakesAllocator : BasePlugin
 {
     public override string ModuleName => "Retakes Allocator Plugin";
@@ -466,7 +465,7 @@ public class RetakesAllocator : BasePlugin
     public HookResult OnPostItemPurchase(EventItemPurchase @event, GameEventInfo info)
     {
         var player = @event.Userid;
-        if (Helpers.IsWarmup() || !Helpers.PlayerIsValid(player) || !player.PlayerPawn.IsValid)
+        if (Helpers.IsWarmup() || !Helpers.PlayerIsValid(player) || player?.PlayerPawn?.IsValid != true)
         {
             return HookResult.Continue;
         }
@@ -583,6 +582,7 @@ public class RetakesAllocator : BasePlugin
         {
             var p = Utilities.GetEntityFromIndex<CBasePlayerWeapon>((int) pEntity.EntityInstance.Index);
             if (
+                p is null ||
                 !p.IsValid ||
                 !p.DesignerName.StartsWith("weapon") ||
                 p.DesignerName.Equals("weapon_c4") ||
@@ -632,12 +632,13 @@ public class RetakesAllocator : BasePlugin
         IsAllocatingForRound = true;
         Log.Debug($"Handling allocate event");
         Server.ExecuteCommand("mp_max_armor 0");
+        Server.ExecuteCommand($"mp_buy_anywhere {(Configs.GetConfigData().EnableBuyMenu ? 1 : 0)}");
 
         var menu = _allocatorMenuManager.GetMenu<VoteMenu>(MenuType.NextRoundVote);
         menu.GatherAndHandleVotes();
 
         var allPlayers = Utilities.GetPlayers()
-            .Where(player => Helpers.PlayerIsValid(player) && player.Connected == PlayerConnectedState.PlayerConnected)
+            .Where(player => Helpers.PlayerIsValid(player) && player.Connected == PlayerConnectedState.Connected)
             .ToList();
 
         OnRoundPostStartHelper.Handle(

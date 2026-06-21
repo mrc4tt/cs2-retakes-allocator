@@ -1,8 +1,16 @@
 ﻿#!/usr/bin/env bash
 
 TARGET_NAME="RetakesAllocator"
-TARGET_DIR="./bin/Release/net8.0"
+# Auto-detect the framework output dir (net8.0/net10.0/...) so this survives
+# TargetFramework bumps instead of hardcoding a version that goes stale.
+TARGET_DIR="$(ls -d ./bin/Release/net*/ 2>/dev/null | head -1)"
+TARGET_DIR="${TARGET_DIR%/}"
 NEW_DIR="./bin/Release/RetakesAllocator"
+
+if [[ -z "$TARGET_DIR" || ! -d "$TARGET_DIR" ]]; then
+    echo "ERROR: no ./bin/Release/net*/ output dir found. Build Release first." >&2
+    exit 1
+fi
 
 echo $TARGET_NAME
 echo $TARGET_DIR

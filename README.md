@@ -89,9 +89,33 @@ for the current round type.
 The convars can be tweaked to customize the experience. For example, if you dont want to allow people to use the buy
 menu the entire round, you can tweak the `mp_buytime` variable as you see fit.
 
+To turn buying off completely, set `EnableBuyMenu` to `false` in the config. When disabled, players keep only the
+loadout the plugin gives them and cannot buy anything. The plugin enforces this by setting `mp_buy_anywhere 0` each
+round (retake spawns are not in a buy zone, so this disables the buy menu); set it back to `true` to allow buying
+again. Either way, `EnableCanAcquireHook` still limits any purchases to weapons valid for the current round.
+
 ### Configuration
 
-The config file is located in the plugin folder under `config/config.json`.
+The config file is located at `addons/counterstrikesharp/configs/plugins/RetakesAllocator/config.json`
+(the standard CounterStrikeSharp config location, so it survives plugin updates). On first
+run the plugin writes a fully commented config file: the settings you usually change are
+grouped at the top, each with a short guide — open it in any text editor and read the comments.
+
+> Upgrading from an older version that kept its config in the plugin folder
+> (`plugins/RetakesAllocator/config/config.json`)? The plugin moves it to the new
+> location automatically on first start — your settings are kept, no action needed.
+
+**Comments are allowed.** You can keep or add `// like this` comments and trailing
+commas in `config.json`; the plugin ignores them when reading. The plugin never
+rewrites your config file, so your comments are preserved across restarts. Any config
+key you remove falls back to its built-in default.
+
+> Common question — *"How do I stop everyone getting the same M4/Deagle every round?"*
+> Weapons are chosen in the order `PlayerChoice` → `Random` → `Default` (see
+> `AllowedWeaponSelectionTypes` below). If that list only has `Default`, every player
+> gets the fixed `DefaultWeapons` set each round. Add `Random` for varied weapons, or
+> `PlayerChoice` to let players pick with `!guns`. To prevent players *buying* weapons
+> outside their allocation, keep `EnableCanAcquireHook` set to `true`.
 
 #### Round Type Configuration
 
