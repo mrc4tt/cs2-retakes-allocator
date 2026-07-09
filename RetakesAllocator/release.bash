@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 
 TARGET_NAME="RetakesAllocator"
 # Auto-detect the framework output dir (net8.0/net10.0/...) so this survives
@@ -18,6 +18,8 @@ echo $NEW_DIR
 
 ls $TARGET_DIR/**
 
+echo rm -rf "$NEW_DIR"
+rm -rf "$NEW_DIR"
 echo cp -r $TARGET_DIR $NEW_DIR
 cp -r $TARGET_DIR $NEW_DIR
 echo rm -rf "$NEW_DIR/runtimes"
@@ -30,6 +32,4 @@ echo cp -rf "$TARGET_DIR/runtimes/win-x64" "$NEW_DIR/runtimes"
 cp -rf "$TARGET_DIR/runtimes/win-x64" "$NEW_DIR/runtimes"
 
 # Remove unnecessary files
-rm "$NEW_DIR/CounterStrikeSharp.API.dll"
-
-tree ./bin
+rm -f "$NEW_DIR/CounterStrikeSharp.API.dll"
