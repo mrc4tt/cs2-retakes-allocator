@@ -88,8 +88,6 @@ public class RetakesAllocator : BasePlugin
             RegisterListener<Listeners.OnTick>(OnTick);
         }
 
-        AddTimer(0.1f, () => { GetRetakesPluginEventSender().RetakesPluginEventHandlers += RetakesEventHandler; });
-
         if (Configs.GetConfigData().MigrateOnStartup)
         {
             Queries.Migrate();
@@ -106,6 +104,33 @@ public class RetakesAllocator : BasePlugin
         {
             HandleHotReload();
         }
+    }
+
+    // Subscribe here rather than in Load(): capabilities registered by other plugins
+    // (retakes_plugin:event_sender) are only guaranteed available once every plugin's
+    // Load() has run. A timer-based grab during Load() races plugin load order and
+    // silently fails when the allocator loads before the retakes plugin.
+    public override void OnAllPluginsLoaded(bool hotReload)
+    {
+        try
+        {
+            SubscribeToRetakesEvents();
+            Log.Debug("Subscribed to retakes plugin events");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(
+                $"Failed to subscribe to retakes plugin events: {ex.Message}. " +
+                "Is the retakes plugin loaded? Players will not receive weapons without it.");
+        }
+    }
+
+    private void SubscribeToRetakesEvents()
+    {
+        var sender = GetRetakesPluginEventSender();
+        // Idempotent: avoid double-subscribing on hot reload.
+        sender.RetakesPluginEventHandlers -= RetakesEventHandler;
+        sender.RetakesPluginEventHandlers += RetakesEventHandler;
     }
 
     private void ResetState(bool loadConfig = true)
