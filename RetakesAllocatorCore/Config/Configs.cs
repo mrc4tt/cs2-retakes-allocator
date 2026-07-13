@@ -298,32 +298,55 @@ public static class Configs
         Directory.CreateDirectory(newDir);
         var newPath = Path.Combine(newDir, ConfigFileName);
 
-        var legacyPath = Path.Combine(modulePath, ConfigDirectoryName, ConfigFileName);
+        // If this path is NOT under addons/counterstrikesharp/configs/plugins/RetakesAllocator,
+        // the running RetakesAllocatorCore.dll is a stale single-".." build.
+        Log.Info($"Config path resolved to '{newPath}' (module '{modulePath}').");
 
-        if (migrateLegacy && !File.Exists(newPath) && File.Exists(legacyPath))
+        // Older builds wrote config.json to other locations. Migrate from the first one
+        // that still exists so admins keep their settings after updating:
+        //   1. plugins/RetakesAllocator/config/config.json         (original in-plugin folder)
+        //   2. plugins/configs/plugins/RetakesAllocator/config.json (buggy single-".." build)
+        var legacyPaths = new[]
         {
-            try
+            Path.Combine(modulePath, ConfigDirectoryName, ConfigFileName),
+            Path.GetFullPath(
+                Path.Combine(modulePath, "..", "configs", "plugins", PluginName, ConfigFileName)),
+        };
+
+        if (migrateLegacy && !File.Exists(newPath))
+        {
+            foreach (var legacyPath in legacyPaths)
             {
-                File.Move(legacyPath, newPath);
-                Log.Info($"Migrated config from '{legacyPath}' to '{newPath}'.");
-            }
-            catch (Exception e)
-            {
-                // Fall back to a copy so a failed move never loses the admin's config.
+                if (!File.Exists(legacyPath) || Path.GetFullPath(legacyPath) == newPath)
+                {
+                    continue;
+                }
+
                 try
                 {
-                    File.Copy(legacyPath, newPath, overwrite: false);
-                    Log.Info(
-                        $"Copied config from '{legacyPath}' to '{newPath}' " +
-                        $"(move failed: {e.Message}). The old file was left in place.");
+                    File.Move(legacyPath, newPath);
+                    Log.Info($"Migrated config from '{legacyPath}' to '{newPath}'.");
                 }
-                catch (Exception e2)
+                catch (Exception e)
                 {
-                    Log.Warn(
-                        $"Failed to migrate config from '{legacyPath}' to '{newPath}': {e2.Message}. " +
-                        $"Using the legacy location instead.");
-                    return legacyPath;
+                    // Fall back to a copy so a failed move never loses the admin's config.
+                    try
+                    {
+                        File.Copy(legacyPath, newPath, overwrite: false);
+                        Log.Info(
+                            $"Copied config from '{legacyPath}' to '{newPath}' " +
+                            $"(move failed: {e.Message}). The old file was left in place.");
+                    }
+                    catch (Exception e2)
+                    {
+                        Log.Warn(
+                            $"Failed to migrate config from '{legacyPath}' to '{newPath}': {e2.Message}. " +
+                            $"Using the legacy location instead.");
+                        return legacyPath;
+                    }
                 }
+
+                break;
             }
         }
 
