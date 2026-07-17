@@ -17,6 +17,39 @@ public class AdvancedGunMenu
     public Dictionary<ulong, int> mainmenu = new Dictionary<ulong, int>();
     public Dictionary<ulong, int> currentIndexDict = new Dictionary<ulong, int>();
     public Dictionary<ulong, bool> buttonPressed = new Dictionary<ulong, bool>();
+
+    // Cached weapon-name lists. They depend only on the allocation config, so they are
+    // identical for every player and every tick — building them 8x per player per tick
+    // (the old behaviour) is what caused the multi-hundred-ms frame spikes. Built once on
+    // first use; call InvalidateWeaponCache() if the allocation config is reloaded at runtime.
+    private string[]? _tFullBuy, _tSecondary, _tHalfBuy, _tPistolRound;
+    private string[]? _ctFullBuy, _ctSecondary, _ctHalfBuy, _ctPistolRound;
+
+    private static string[] BuildWeaponList(WeaponAllocationType type, CsTeam team)
+    {
+        var list = new List<string>();
+        foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(type, team))
+        {
+            list.Add(weapon.GetName());
+        }
+        return list.ToArray();
+    }
+
+    private void EnsureWeaponCache()
+    {
+        if (_tFullBuy != null) return;
+        _tFullBuy      = BuildWeaponList(WeaponAllocationType.FullBuyPrimary, CsTeam.Terrorist);
+        _tSecondary    = BuildWeaponList(WeaponAllocationType.Secondary, CsTeam.Terrorist);
+        _tHalfBuy      = BuildWeaponList(WeaponAllocationType.HalfBuyPrimary, CsTeam.Terrorist);
+        _tPistolRound  = BuildWeaponList(WeaponAllocationType.PistolRound, CsTeam.Terrorist);
+        _ctFullBuy     = BuildWeaponList(WeaponAllocationType.FullBuyPrimary, CsTeam.CounterTerrorist);
+        _ctSecondary   = BuildWeaponList(WeaponAllocationType.Secondary, CsTeam.CounterTerrorist);
+        _ctHalfBuy     = BuildWeaponList(WeaponAllocationType.HalfBuyPrimary, CsTeam.CounterTerrorist);
+        _ctPistolRound = BuildWeaponList(WeaponAllocationType.PistolRound, CsTeam.CounterTerrorist);
+    }
+
+    public void InvalidateWeaponCache() => _tFullBuy = null;
+
     private static void Print(CCSPlayerController player, string message)
     {
         Helpers.WriteNewlineDelimited(message, player.PrintToChat);
@@ -60,6 +93,10 @@ public class AdvancedGunMenu
 
     public void OnTick()
     {
+        // Nobody has the menu open -> nothing to draw. Bail before the (per-tick) entity
+        // scan so the menu costs zero when unused.
+        if (menuon.Count == 0) return;
+
         var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
         foreach (var player in playerEntities)
         {
@@ -79,17 +116,7 @@ public class AdvancedGunMenu
                     string.IsNullOrEmpty(Translator.Instance["menu.main.awp"]) ? "█░ AWP ░█" : Translator.Instance["menu.main.awp"]
                 };
 
-                List<string> TFullBuyList = new List<string>();
-                List<string> TSecondaryList = new List<string>();
-                List<string> THalfBuyList = new List<string>();
-                List<string> TPistolRoundList = new List<string>();
-
-                List<string> CTFullBuyList = new List<string>();
-                List<string> CTSecondaryList = new List<string>();
-                List<string> CTHalfBuyList = new List<string>();
-                List<string> CTPistolRoundList = new List<string>();
-
-                string[] Tloadout = { 
+                string[] Tloadout = {
                     string.IsNullOrEmpty(Translator.Instance["menu.tprimary"]) ? "█ T Primary █" : Translator.Instance["menu.tprimary"], 
                     string.IsNullOrEmpty(Translator.Instance["menu.tsecondary"]) ? "█ T Secondary █" : Translator.Instance["menu.tsecondary"],
                     string.IsNullOrEmpty(Translator.Instance["menu.tPistol"]) ? "█ T Pistol Round █" : Translator.Instance["menu.tPistol"],
@@ -109,49 +136,16 @@ public class AdvancedGunMenu
                 };
 
 
-                foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(WeaponAllocationType.FullBuyPrimary, CsTeam.Terrorist))
-                {
-                    TFullBuyList.Add(weapon.GetName());
-                }
-                foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(WeaponAllocationType.Secondary, CsTeam.Terrorist))
-                {
-                    TSecondaryList.Add(weapon.GetName());
-                }
-                foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(WeaponAllocationType.HalfBuyPrimary, CsTeam.Terrorist))
-                {
-                    THalfBuyList.Add(weapon.GetName());
-                }
-                foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(WeaponAllocationType.PistolRound, CsTeam.Terrorist))
-                {
-                    TPistolRoundList.Add(weapon.GetName());
-                }
+                EnsureWeaponCache();
+                string[] TFullBuy = _tFullBuy!;
+                string[] TSecondary = _tSecondary!;
+                string[] THalfBuy = _tHalfBuy!;
+                string[] TPistolRound = _tPistolRound!;
 
-                foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(WeaponAllocationType.FullBuyPrimary, CsTeam.CounterTerrorist))
-                {
-                    CTFullBuyList.Add(weapon.GetName());
-                }
-                foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(WeaponAllocationType.Secondary, CsTeam.CounterTerrorist))
-                {
-                    CTSecondaryList.Add(weapon.GetName());
-                }
-                foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(WeaponAllocationType.HalfBuyPrimary, CsTeam.CounterTerrorist))
-                {
-                    CTHalfBuyList.Add(weapon.GetName());
-                }
-                foreach (var weapon in WeaponHelpers.GetPossibleWeaponsForAllocationType(WeaponAllocationType.PistolRound, CsTeam.CounterTerrorist))
-                {
-                    CTPistolRoundList.Add(weapon.GetName());
-                }
-
-                string[] TFullBuy = TFullBuyList.ToArray();
-                string[] TSecondary = TSecondaryList.ToArray();
-                string[] THalfBuy = THalfBuyList.ToArray();
-                string[] TPistolRound = TPistolRoundList.ToArray();
-
-                string[] CTFullBuy = CTFullBuyList.ToArray();
-                string[] CTSecondary = CTSecondaryList.ToArray();
-                string[] CTHalfBuy = CTHalfBuyList.ToArray();
-                string[] CTPistolRound = CTPistolRoundList.ToArray();
+                string[] CTFullBuy = _ctFullBuy!;
+                string[] CTSecondary = _ctSecondary!;
+                string[] CTHalfBuy = _ctHalfBuy!;
+                string[] CTPistolRound = _ctPistolRound!;
 
                 if (player.Buttons == 0)
                 {
