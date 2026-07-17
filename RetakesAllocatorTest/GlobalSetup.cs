@@ -1,5 +1,6 @@
 using System.Globalization;
 using CounterStrikeSharp.API.Core.Translations;
+using Microsoft.Extensions.Logging;
 using RetakesAllocatorCore;
 using RetakesAllocatorCore.Config;
 using RetakesAllocatorCore.Db;
@@ -20,6 +21,13 @@ public class GlobalSetup
         // RetakesAllocator/lang/en.json and avoids that fallback path entirely.
         CultureInfo.CurrentCulture = new CultureInfo("en-US");
         CultureInfo.CurrentUICulture = new CultureInfo("en-US");
+
+        // Mute plugin console output during tests. Log writes to Console.WriteLine, which the
+        // test host captures and re-emits as build warnings (one per test that logs). Tests
+        // assert on Validate()'s returned warning list, not on console output, so silencing
+        // here removes the noise without weakening any assertion. Static => survives the
+        // per-test Configs.Load() reloads in BaseTestFixture.
+        Log.LevelOverride = LogLevel.None;
 
         Configs.Load(".", true);
         Queries.Migrate();

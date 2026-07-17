@@ -6,9 +6,17 @@ namespace RetakesAllocatorCore;
 
 public static class Log
 {
+    /// <summary>
+    /// When set, overrides the config-driven log level. Used by the test suite to mute
+    /// plugin console output (which the test host otherwise surfaces as build warnings).
+    /// Null in production, so normal config-driven behaviour is unchanged.
+    /// </summary>
+    public static LogLevel? LevelOverride;
+
     private static void Write(string message, LogLevel level)
     {
-        var currentLevel = Configs.IsLoaded() ? Configs.GetConfigData().LogLevel : LogLevel.Error;
+        var currentLevel = LevelOverride
+                           ?? (Configs.IsLoaded() ? Configs.GetConfigData().LogLevel : LogLevel.Error);
         if (currentLevel == LogLevel.None || level < currentLevel)
         {
             return;
