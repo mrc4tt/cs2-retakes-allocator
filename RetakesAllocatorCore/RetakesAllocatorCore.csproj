@@ -16,6 +16,13 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.14"/>
         <PackageReference Include="MySqlConnector" Version="2.3.4" />
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
+        <!-- Pinned to 2.1.x for the MANAGED glue (SQLitePCLRaw.core / provider.e_sqlite3 /
+             Batteries_V2 ABI). Its bundled native libe_sqlite3.so is intentionally OVERRIDDEN by
+             the OverridePatchedSqliteNative target in RetakesAllocator.csproj, because:
+               - 2.1.x bundled native = SQLite < 3.50.2 => CVE-2025-6965 (NU1903), and
+               - 3.0.x bundled native = GLIBC_2.33+ => won't load on the game container (glibc 2.31).
+             Our replacement = SQLite 3.50.2 (patched) compiled at GLIBC_2.14 (runs everywhere).
+             Do NOT bump to 3.x expecting it to "just work" on the container. -->
         <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.11" />
     </ItemGroup>
 

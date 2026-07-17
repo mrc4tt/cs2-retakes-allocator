@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!-- NU1903: SQLitePCLRaw.lib.e_sqlite3 <=2.1.11 is flagged for CVE-2025-6965 (SQLite
+         < 3.50.2). We do NOT ship that native: the OverridePatchedSqliteNative target in
+         RetakesAllocator.csproj replaces it in build output with our own SQLite 3.50.2 build
+         (CVE patched, GLIBC_2.14 so it loads on old game containers). The flag is on the
+         transitive package version, not the binary we actually deploy. Suppressed repo-wide
+         so all three projects (Core / RetakesAllocator / Test) build clean. -->
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
+  </PropertyGroup>
+</Project>
