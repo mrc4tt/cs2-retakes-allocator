@@ -10,12 +10,29 @@ public class OnWeaponCommandHelper
     public static string Handle(ICollection<string> args, ulong userId, RoundType? roundType, CsTeam currentTeam,
         bool remove, out CsItem? outWeapon)
     {
-        var result = Task.Run(() => HandleAsync(args, userId, roundType, currentTeam, remove)).Result;
+        var result = HandleCore(args, userId, roundType, currentTeam, remove);
         outWeapon = result.Item2;
         return result.Item1;
     }
 
-    public static async Task<Tuple<string, CsItem?>> HandleAsync(ICollection<string> args, ulong userId,
+    /// <summary>
+    /// Async-shaped wrapper kept for the test suite and for callers that are already in an
+    /// async context. The work itself is synchronous — see <see cref="HandleCore"/>.
+    /// </summary>
+    public static Task<Tuple<string, CsItem?>> HandleAsync(ICollection<string> args, ulong userId,
+        RoundType? roundType, CsTeam currentTeam,
+        bool remove) => Task.FromResult(HandleCore(args, userId, roundType, currentTeam, remove));
+
+    /// <summary>
+    /// This body has no await points: every persistence call below is deliberately
+    /// fire-and-forget (<c>_ = Queries...Async(...)</c>), so nothing here ever waits on the
+    /// database. It used to be an <c>async</c> method that <see cref="Handle"/> ran through
+    /// <c>Task.Run(...).Result</c> — which handed a purely synchronous workload to the thread
+    /// pool and then blocked the game thread until a worker picked it up. Under thread pool
+    /// pressure (round start, many commands at once) that is a multi-millisecond stall on the
+    /// tick for no benefit at all. Called directly now.
+    /// </summary>
+    public static Tuple<string, CsItem?> HandleCore(ICollection<string> args, ulong userId,
         RoundType? roundType, CsTeam currentTeam,
         bool remove)
     {

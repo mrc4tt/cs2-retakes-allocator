@@ -1,0 +1,44 @@
+<Project>
+  <!--
+    Builds against the CounterStrikeSharp API that fshost runs (mrc4tt/CounterStrikeSharp).
+    That fork is not published to NuGet, so the API assemblies are taken from its release zip:
+    downloaded once into .css/<version>/ (git-ignored) and referenced with Private=false, so
+    nothing from CounterStrikeSharp's api/ folder ends up in the plugin's build output.
+
+    Opt in per project with <UseCounterStrikeSharp>true</UseCounterStrikeSharp>. Test projects
+    that run the code outside the game set <CssCopyLocal>true</CssCopyLocal>.
+    Bump the version here (or pass -p:CssVersion=x.y.z) when fshost updates CounterStrikeSharp.
+  -->
+  <PropertyGroup>
+    <CssVersion Condition="'$(CssVersion)' == ''">1.0.407</CssVersion>
+    <CssCopyLocal Condition="'$(CssCopyLocal)' == ''">false</CssCopyLocal>
+    <CssRepo Condition="'$(CssRepo)' == ''">mrc4tt/CounterStrikeSharp</CssRepo>
+    <CssRoot>$(MSBuildThisFileDirectory).css/$(CssVersion)/</CssRoot>
+    <CssApiDir>$(CssRoot)addons/counterstrikesharp/api/</CssApiDir>
+    <CssZipUrl>https://github.com/$(CssRepo)/releases/download/v$(CssVersion)/counterstrikesharp-linux-$(CssVersion).zip</CssZipUrl>
+  </PropertyGroup>
+
+  <Target Name="FetchCounterStrikeSharpApi"
+          Condition="'$(UseCounterStrikeSharp)' == 'true' And !Exists('$(CssApiDir)CounterStrikeSharp.API.dll')">
+    <DownloadFile SourceUrl="$(CssZipUrl)" DestinationFolder="$(CssRoot)" Retries="3">
+      <Output TaskParameter="DownloadedFile" PropertyName="_CssZip" />
+    </DownloadFile>
+    <Unzip SourceFiles="$(_CssZip)" DestinationFolder="$(CssRoot)" Include="addons/counterstrikesharp/api/*.dll" />
+    <Delete Files="$(_CssZip)" />
+  </Target>
+
+  <Target Name="AddCounterStrikeSharpReferences"
+          Condition="'$(UseCounterStrikeSharp)' == 'true'"
+          DependsOnTargets="FetchCounterStrikeSharpApi"
+          BeforeTargets="_HandlePackageFileConflicts;ResolveAssemblyReferences">
+    <ItemGroup>
+      <_CssApiDll Include="$(CssApiDir)*.dll" />
+      <Reference Include="@(_CssApiDll->'%(Filename)')">
+        <HintPath>%(_CssApiDll.FullPath)</HintPath>
+        <Private>$(CssCopyLocal)</Private>
+      </Reference>
+    </ItemGroup>
+    <Error Condition="!Exists('$(CssApiDir)CounterStrikeSharp.API.dll')"
+           Text="CounterStrikeSharp.API.dll $(CssVersion) not found in $(CssApiDir)." />
+  </Target>
+</Project>

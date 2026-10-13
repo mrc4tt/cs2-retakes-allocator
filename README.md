@@ -1,6 +1,12 @@
-﻿# CS2 Retakes Allocator
+# CS2 Retakes Allocator (fshost build)
 
-[![Build RetakesAllocator.zip](https://github.com/mrc4tt/cs2-retakes-allocator/actions/workflows/build.yml/badge.svg)](https://github.com/mrc4tt/cs2-retakes-allocator/actions/workflows/build.yml)
+> This is fshost's maintained copy of **[yonilerner/cs2-retakes-allocator](https://github.com/yonilerner/cs2-retakes-allocator)**
+> by **yonilerner** and contributors. All credit for the plugin goes to the original authors.
+> It is distributed under the original GPL-3.0 license (see [LICENSE](LICENSE)).
+>
+> Differences from upstream: built against the CounterStrikeSharp API fshost runs
+> (mrc4tt/CounterStrikeSharp), works when loaded with `css_plugins load`, and the fixes
+> listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Retakes
 
@@ -10,11 +16,10 @@ This plugin is made to run alongside B3none's retakes implementation: https://gi
 
 - Ensure you have https://github.com/b3none/cs2-retakes installed already
 - Update the `RetakesPlugin` config to have `EnableFallbackAllocation` disabled
-- Download a release from https://github.com/mrc4tt/cs2-retakes-allocator/releases
-- Extract the zip archive and upload the `RetakesAllocator` plugin to your CounterStrikeSharp plugins folder on your
-  server
-    - Each build comes with two necessary runtimes for sqlite3, one for linux64 and one for win64. If you need a
-      different runtime, please submit an issue and I can provide more runtimes
+- Download **RetakesAllocator.zip** from https://github.com/mrc4tt/cs2-retakes-allocator/releases/latest
+- Extract the zip archive into the game server's `csgo/` directory. It contains
+  `addons/counterstrikesharp/plugins/RetakesAllocator/` and `addons/counterstrikesharp/gamedata/RetakesAllocator.json`
+    - Builds are Linux only (linux-x64 sqlite3 runtime)
     - If you're wondering why so many DLLs in the build: They are necessary for the Entity Framework that enables modern
       interfaces for databases
 - [Buy Menu - Optional] If you want buy menu weapon selection to work, ensure the following convars are set at the
@@ -38,9 +43,9 @@ This plugin relies on some function signatures that:
 
 Custom game data signatures are maintained in https://github.com/mrc4tt/cs2-retakes-allocator/blob/main/Resources/RetakesAllocator_gamedata.json. There are a few ways to keep these up to date on your server:
 - If you want the plugin to automatically download the signatures, you can do so by running the plugin with the `AutoUpdateSignatures` config set to `true`. **This is the recommended approach**. See more below in the "Configuration" section.
-- If you want to manually download the signatures, you can do so by downloading the `RetakesAllocator_gamedata.json` file from Github and placing it in the `RetakesAllocator/gamedata` folder in the plugin. You may have to create that folder if it does not exist.
+- If you want to manually download the signatures, you can do so by downloading the `RetakesAllocator_gamedata.json` file from Github and saving it as `addons/counterstrikesharp/gamedata/RetakesAllocator.json`.
 
-If you do not want to use any custom game data/signatures, you can disable `AutoUpdateSignatures` and `CapabilityWeaponPaints`. If you do this (and if you previously had downloaded custom game data, make sure to delete the `RetakesAllocator/gamedata/RetakesAllocator_gamedata.json` file), the plugin will fallback to using the default CS# signatures. See more below in the "Configuration" section.
+If you do not want to use any custom game data/signatures, you can disable `AutoUpdateSignatures` and `CapabilityWeaponPaints`. If you do this (and if you previously had downloaded custom game data, make sure to delete the `addons/counterstrikesharp/gamedata/RetakesAllocator.json` file), the plugin will fallback to using the default CS# signatures. See more below in the "Configuration" section.
 
 ## Usage
 

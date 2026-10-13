@@ -20,6 +20,10 @@ public static class Configs
     // updates: addons/counterstrikesharp/configs/plugins/RetakesAllocator/config.json.
     private static readonly string PluginName = "RetakesAllocator";
 
+    // Anchor directory used to locate the configs/ root regardless of how deep the
+    // plugin folder itself is nested under plugins/.
+    private static readonly string CssRootDirectoryName = "counterstrikesharp";
+
     private static string? _configFilePath;
     private static ConfigData? _configData;
 
@@ -283,64 +287,65 @@ public static class Configs
     }
 
     /// <summary>
-    /// Resolves where config.json lives, preferring the CSS-standard
-    /// configs/plugins/RetakesAllocator/ location (which survives plugin updates).
-    /// When <paramref name="migrateLegacy"/> is true and a config only exists at the
-    /// old in-plugin-folder location, it is moved to the new path so existing servers
-    /// keep their settings after the move. The move preserves the file verbatim, so
-    /// any // comments and custom values are kept.
+    /// Resolves where config.json lives: the CSS-standard
+    /// addons/counterstrikesharp/configs/plugins/RetakesAllocator/config.json, outside the plugin
+    /// folder so the admin's settings survive the plugin folder being replaced on an update.
+    /// When <paramref name="migrateLegacy"/> is true and a config only exists at a location a
+    /// previous build used, it is moved to the new path so existing servers keep their settings.
+    /// The move preserves the file verbatim, so any // comments and custom values are kept.
     /// </summary>
     private static string ResolveConfigFilePath(string modulePath, bool migrateLegacy)
     {
-        // .../plugins/RetakesAllocator  ->  .../configs/plugins/RetakesAllocator
-        var newDir = Path.GetFullPath(
-            Path.Combine(modulePath, "..", "..", "configs", "plugins", PluginName));
-        Directory.CreateDirectory(newDir);
-        var newPath = Path.Combine(newDir, ConfigFileName);
+        var configDir = ResolveConfigsPluginDir(modulePath);
+        Directory.CreateDirectory(configDir);
+        var configPath = Path.Combine(configDir, ConfigFileName);
 
-        // If this path is NOT under addons/counterstrikesharp/configs/plugins/RetakesAllocator,
-        // the running RetakesAllocatorCore.dll is a stale single-".." build.
-        Log.Info($"Config path resolved to '{newPath}' (module '{modulePath}').");
+        Log.Info($"Config path resolved to '{configPath}' (module '{modulePath}').");
 
-        // Older builds wrote config.json to other locations. Migrate from the first one
-        // that still exists so admins keep their settings after updating:
-        //   1. plugins/RetakesAllocator/config/config.json         (original in-plugin folder)
-        //   2. plugins/configs/plugins/RetakesAllocator/config.json (buggy single-".." build)
+        // Earlier builds wrote config.json to other locations. Migrate from the first one
+        // that still exists so admins keep their settings:
+        //   1. <module>/config/config.json                         (in-plugin folder)
+        //   2. <module>/../configs/plugins/RetakesAllocator/...    (single-".." build)
+        //   3. <module>/../../configs/plugins/RetakesAllocator/... (fixed-depth build; lands
+        //      outside configs/ when the plugin is nested, e.g. plugins/disabled/...)
         var legacyPaths = new[]
         {
-            Path.Combine(modulePath, ConfigDirectoryName, ConfigFileName),
+            Path.GetFullPath(Path.Combine(modulePath, ConfigDirectoryName, ConfigFileName)),
             Path.GetFullPath(
                 Path.Combine(modulePath, "..", "configs", "plugins", PluginName, ConfigFileName)),
+            Path.GetFullPath(
+                Path.Combine(modulePath, "..", "..", "configs", "plugins", PluginName, ConfigFileName)),
         };
 
-        if (migrateLegacy && !File.Exists(newPath))
+        if (migrateLegacy && !File.Exists(configPath))
         {
             foreach (var legacyPath in legacyPaths)
             {
-                if (!File.Exists(legacyPath) || Path.GetFullPath(legacyPath) == newPath)
+                if (!File.Exists(legacyPath) || legacyPath == Path.GetFullPath(configPath))
                 {
                     continue;
                 }
 
                 try
                 {
-                    File.Move(legacyPath, newPath);
-                    Log.Info($"Migrated config from '{legacyPath}' to '{newPath}'.");
+                    File.Move(legacyPath, configPath);
+                    Log.Info($"Migrated config from '{legacyPath}' to '{configPath}'.");
+                    PruneEmptyLegacyDirs(legacyPath, modulePath);
                 }
                 catch (Exception e)
                 {
                     // Fall back to a copy so a failed move never loses the admin's config.
                     try
                     {
-                        File.Copy(legacyPath, newPath, overwrite: false);
+                        File.Copy(legacyPath, configPath, overwrite: false);
                         Log.Info(
-                            $"Copied config from '{legacyPath}' to '{newPath}' " +
+                            $"Copied config from '{legacyPath}' to '{configPath}' " +
                             $"(move failed: {e.Message}). The old file was left in place.");
                     }
                     catch (Exception e2)
                     {
                         Log.Warn(
-                            $"Failed to migrate config from '{legacyPath}' to '{newPath}': {e2.Message}. " +
+                            $"Failed to migrate config from '{legacyPath}' to '{configPath}': {e2.Message}. " +
                             $"Using the legacy location instead.");
                         return legacyPath;
                     }
@@ -350,7 +355,107 @@ public static class Configs
             }
         }
 
-        return newPath;
+        return configPath;
+    }
+
+    /// <summary>
+    /// Finds addons/counterstrikesharp/configs/plugins/RetakesAllocator. Walks up from the module directory
+    /// looking for the counterstrikesharp root rather than assuming the plugin sits exactly at
+    /// plugins/&lt;PluginName&gt;, since hosts nest it deeper (for example
+    /// plugins/disabled/RetakesAllocator, where a fixed "../.." hop lands on
+    /// plugins/configs/plugins/RetakesAllocator instead).
+    /// </summary>
+    private static string ResolveConfigsPluginDir(string modulePath)
+    {
+        var cssRoot = FindCssRoot(modulePath);
+        if (cssRoot is not null)
+        {
+            return Path.Combine(cssRoot.FullName, "configs", "plugins", PluginName);
+        }
+
+        // Unknown layout (tests, custom installs): keep the historical
+        // plugins/<PluginName> -> configs/plugins/<PluginName> hop.
+        return Path.GetFullPath(
+            Path.Combine(modulePath, "..", "..", "configs", "plugins", PluginName));
+    }
+
+    /// <summary>
+    /// Where the plugin's custom gamedata lives: addons/counterstrikesharp/gamedata/RetakesAllocator.json,
+    /// which is what the release zip ships and what AutoUpdateSignatures refreshes. Falls back to
+    /// the old in-plugin-folder location when the counterstrikesharp root cannot be found.
+    /// </summary>
+    public static string ResolveGamedataFilePath(string modulePath)
+    {
+        var cssRoot = FindCssRoot(modulePath);
+        return cssRoot is not null
+            ? Path.Combine(cssRoot.FullName, "gamedata", $"{PluginName}.json")
+            : Path.Combine(modulePath, "gamedata", "RetakesAllocator_gamedata.json");
+    }
+
+    private static DirectoryInfo? FindCssRoot(string modulePath)
+    {
+        var dir = new DirectoryInfo(Path.GetFullPath(modulePath));
+        while (dir is not null)
+        {
+            if (string.Equals(dir.Name, CssRootDirectoryName, StringComparison.OrdinalIgnoreCase))
+            {
+                return dir;
+            }
+
+            dir = dir.Parent;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// After a config is migrated out of a legacy location, removes the directories it left
+    /// behind — for example the stray plugins/configs/plugins/RetakesAllocator tree an earlier
+    /// build created, all the way up to and including plugins/configs.
+    /// Deletion is deliberately conservative: only empty directories are removed, and the walk
+    /// stops before the counterstrikesharp root, before any top-level directory directly under
+    /// it (configs/, plugins/, gamedata/, ...), and before any ancestor of the plugin folder.
+    /// </summary>
+    private static void PruneEmptyLegacyDirs(string legacyFilePath, string modulePath)
+    {
+        var cssRoot = FindCssRoot(modulePath);
+        if (cssRoot is null)
+        {
+            return;
+        }
+
+        var moduleFullPath = Path.GetFullPath(modulePath);
+        var dir = new DirectoryInfo(Path.GetFullPath(legacyFilePath)).Parent;
+
+        while (dir is not null && dir.Parent is not null)
+        {
+            // Never touch the CSS root, its top-level directories, or anything holding the plugin.
+            if (dir.FullName == cssRoot.FullName ||
+                dir.Parent.FullName == cssRoot.FullName ||
+                moduleFullPath == dir.FullName ||
+                moduleFullPath.StartsWith(dir.FullName + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            try
+            {
+                if (Directory.EnumerateFileSystemEntries(dir.FullName).Any())
+                {
+                    return;
+                }
+
+                var parent = dir.Parent;
+                Directory.Delete(dir.FullName);
+                Log.Info($"Removed empty legacy config directory '{dir.FullName}'.");
+                dir = parent;
+            }
+            catch (Exception e)
+            {
+                Log.Warn($"Could not remove empty legacy config directory '{dir.FullName}': {e.Message}.");
+                return;
+            }
+        }
     }
 
     public static ConfigData Load(string modulePath, bool saveAfterLoad = false)

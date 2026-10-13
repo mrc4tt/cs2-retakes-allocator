@@ -59,6 +59,8 @@ public class RetakesAllocator : BasePlugin
             ResetState();
             Log.Debug($"Setting map name {mapName}");
             RoundTypeManager.Instance.SetMap(mapName);
+            // Picks up a retakes plugin that was (re)loaded since we last subscribed.
+            TrySubscribeToRetakesEvents();
         });
 
         _ = Task.Run(async () =>
@@ -104,6 +106,51 @@ public class RetakesAllocator : BasePlugin
         {
             HandleHotReload();
         }
+        else if (IsMapRunning())
+        {
+            // Loaded with css_plugins load while a map is already running (how fshost's
+            // CustomCommands switches to retakes): OnMapStart already fired for this map.
+            RoundTypeManager.Instance.SetMap(Server.MapName);
+        }
+
+        // css_plugins load never calls OnAllPluginsLoaded, so subscribe here as well. The
+        // retakes plugin is normally loaded just before us; if it is not there yet, retry
+        // for a while instead of silently never allocating.
+        if (!TrySubscribeToRetakesEvents())
+        {
+            var attempts = 0;
+            _subscribeRetryTimer = AddTimer(1.0f, () =>
+            {
+                attempts++;
+                if (TrySubscribeToRetakesEvents() || attempts >= 30)
+                {
+                    if (RetakesPluginEventSender is null)
+                    {
+                        Log.Error(
+                            "Retakes plugin event sender not found. Is the retakes plugin loaded? " +
+                            "Players will not receive weapons until it is (or until the next map).");
+                    }
+
+                    _subscribeRetryTimer?.Kill();
+                    _subscribeRetryTimer = null;
+                }
+            }, TimerFlags.REPEAT);
+        }
+    }
+
+    private CounterStrikeSharp.API.Modules.Timers.Timer? _subscribeRetryTimer;
+
+    private static bool IsMapRunning()
+    {
+        try
+        {
+            return !string.IsNullOrEmpty(Server.MapName);
+        }
+        catch
+        {
+            // Globals are not available before the first map has started.
+            return false;
+        }
     }
 
     // Subscribe here rather than in Load(): capabilities registered by other plugins
@@ -112,25 +159,67 @@ public class RetakesAllocator : BasePlugin
     // silently fails when the allocator loads before the retakes plugin.
     public override void OnAllPluginsLoaded(bool hotReload)
     {
-        try
-        {
-            SubscribeToRetakesEvents();
-            Log.Debug("Subscribed to retakes plugin events");
-        }
-        catch (Exception ex)
+        if (!TrySubscribeToRetakesEvents())
         {
             Log.Error(
-                $"Failed to subscribe to retakes plugin events: {ex.Message}. " +
+                "Failed to subscribe to retakes plugin events. " +
                 "Is the retakes plugin loaded? Players will not receive weapons without it.");
         }
     }
 
-    private void SubscribeToRetakesEvents()
+    /// <summary>
+    /// Subscribes to the retakes plugin's event sender. Always re-reads the capability, so a
+    /// retakes plugin that was unloaded and loaded again (a new sender instance) is picked up
+    /// and the stale sender is dropped. Idempotent; returns false when retakes is not loaded.
+    /// </summary>
+    private bool TrySubscribeToRetakesEvents()
     {
-        var sender = GetRetakesPluginEventSender();
-        // Idempotent: avoid double-subscribing on hot reload.
+        IRetakesPluginEventSender? sender;
+        try
+        {
+            sender = new PluginCapability<IRetakesPluginEventSender>("retakes_plugin:event_sender").Get();
+        }
+        catch (Exception ex)
+        {
+            Log.Debug($"Retakes plugin event sender not available: {ex.Message}");
+            sender = null;
+        }
+
+        if (sender is null)
+        {
+            return false;
+        }
+
+        if (!ReferenceEquals(sender, RetakesPluginEventSender))
+        {
+            UnsubscribeFromRetakesEvents();
+            RetakesPluginEventSender = sender;
+        }
+
         sender.RetakesPluginEventHandlers -= RetakesEventHandler;
         sender.RetakesPluginEventHandlers += RetakesEventHandler;
+        Log.Debug("Subscribed to retakes plugin events");
+        return true;
+    }
+
+    private void UnsubscribeFromRetakesEvents()
+    {
+        if (RetakesPluginEventSender is null)
+        {
+            return;
+        }
+
+        try
+        {
+            RetakesPluginEventSender.RetakesPluginEventHandlers -= RetakesEventHandler;
+        }
+        catch (Exception ex)
+        {
+            // The retakes plugin may already be unloaded; nothing left to detach from.
+            Log.Debug($"Could not unsubscribe from retakes plugin events: {ex.Message}");
+        }
+
+        RetakesPluginEventSender = null;
     }
 
     private void ResetState(bool loadConfig = true)
@@ -163,29 +252,21 @@ public class RetakesAllocator : BasePlugin
         ResetState(loadConfig: false);
         Queries.Disconnect();
 
-        GetRetakesPluginEventSender().RetakesPluginEventHandlers -= RetakesEventHandler;
+        _subscribeRetryTimer?.Kill();
+        _subscribeRetryTimer = null;
+        UnsubscribeFromRetakesEvents();
 
-        if (Configs.GetConfigData().EnableCanAcquireHook && CustomFunctions != null)
+        // Unhook regardless of the current EnableCanAcquireHook value: css_reload_allocator_config
+        // can flip it after the hook was installed, and a hook left behind points into this
+        // plugin's unloaded assembly.
+        try
         {
-            CustomFunctions.CCSPlayer_ItemServices_CanAcquireFunc?.Unhook(OnWeaponCanAcquire, HookMode.Pre);
+            CustomFunctions?.CCSPlayer_ItemServices_CanAcquireFunc?.Unhook(OnWeaponCanAcquire, HookMode.Pre);
         }
-    }
-
-    private IRetakesPluginEventSender GetRetakesPluginEventSender()
-    {
-        if (RetakesPluginEventSender is not null)
+        catch (Exception ex)
         {
-            return RetakesPluginEventSender;
+            Log.Debug($"CanAcquire unhook failed: {ex.Message}");
         }
-
-        var sender = new PluginCapability<IRetakesPluginEventSender>("retakes_plugin:event_sender").Get();
-        if (sender is null)
-        {
-            throw new Exception("Couldn't load retakes plugin event sender capability");
-        }
-
-        RetakesPluginEventSender = sender;
-        return sender;
     }
 
     private void RetakesEventHandler(object? _, IRetakesPluginEvent @event)
@@ -297,20 +378,48 @@ public class RetakesAllocator : BasePlugin
             return;
         }
 
-        var result = Task.Run(async () =>
-        {
-            var currentPreferredSetting = (await Queries.GetUserSettings(playerId))
-                ?.GetWeaponPreference(currentTeam, WeaponAllocationType.Preferred);
+        // Queries.GetUserSettings is a real database round trip. Blocking the game thread on
+        // it (the old Task.Run(...).Result) froze the whole server for the duration of the
+        // query, which every connected player sees as a lag/choke spike. Run it off-thread and
+        // deliver the reply on the next frame instead.
+        var currentRoundType = RoundTypeManager.Instance.GetCurrentRoundType();
+        var playerSlot = player.Slot;
 
-            return await OnWeaponCommandHelper.HandleAsync(
-                new List<string> {CsItem.AWP.ToString()},
-                playerId,
-                RoundTypeManager.Instance.GetCurrentRoundType(),
-                currentTeam,
-                currentPreferredSetting is not null
-            );
-        }).Result;
-        Helpers.WriteNewlineDelimited(result.Item1, commandInfo.ReplyToCommand);
+        _ = Task.Run(async () =>
+        {
+            Tuple<string, CsItem?> result;
+            try
+            {
+                var currentPreferredSetting = (await Queries.GetUserSettings(playerId))
+                    ?.GetWeaponPreference(currentTeam, WeaponAllocationType.Preferred);
+
+                result = await OnWeaponCommandHelper.HandleAsync(
+                    new List<string> {CsItem.AWP.ToString()},
+                    playerId,
+                    currentRoundType,
+                    currentTeam,
+                    currentPreferredSetting is not null
+                );
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"{LogPrefix}css_awp failed for {playerId}: {e.Message}");
+                return;
+            }
+
+            Server.NextFrame(() =>
+            {
+                // The player may have disconnected (or their slot been reused) while the
+                // query was in flight.
+                var target = Utilities.GetPlayerFromSlot(playerSlot);
+                if (target is null || !target.IsValid || Helpers.GetSteamId(target) != playerId)
+                {
+                    return;
+                }
+
+                Helpers.WriteNewlineDelimited(result.Item1, target.PrintToChat);
+            });
+        });
     }
 
     [ConsoleCommand("css_removegun")]

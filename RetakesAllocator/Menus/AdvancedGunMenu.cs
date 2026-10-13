@@ -18,6 +18,16 @@ public class AdvancedGunMenu
     public Dictionary<ulong, int> currentIndexDict = new Dictionary<ulong, int>();
     public Dictionary<ulong, bool> buttonPressed = new Dictionary<ulong, bool>();
 
+    // SteamID -> player slot, recorded when the menu is opened. OnTick used to run a full
+    // FindAllEntitiesByDesignerName("cs_player_controller") scan every tick to turn the
+    // menuon keys back into controllers; the slot is already known at open time, so the
+    // scan was pure waste. GetPlayerFromSlot is an O(1) index lookup.
+    private readonly Dictionary<ulong, int> _slotById = new();
+
+    // Reused across ticks so the draw loop allocates nothing steady-state.
+    private readonly List<ulong> _tickIds = new();
+    private readonly StringBuilder _builder = new();
+
     // Cached weapon-name lists. They depend only on the allocation config, so they are
     // identical for every player and every tick — building them 8x per player per tick
     // (the old behaviour) is what caused the multi-hundred-ms frame spikes. Built once on
@@ -48,7 +58,73 @@ public class AdvancedGunMenu
         _ctPistolRound = BuildWeaponList(WeaponAllocationType.PistolRound, CsTeam.CounterTerrorist);
     }
 
-    public void InvalidateWeaponCache() => _tFullBuy = null;
+    // Cached menu chrome. Translator.Instance[...] takes no player argument, so every one of
+    // these is server-global and identical on every tick for every player. The old code did
+    // ~30 dictionary lookups and allocated 4 string[] per player per tick; at 64 tick with a
+    // handful of menus open that is thousands of gen0 allocations a second, which is what
+    // turned into GC pauses and choke. Built once; InvalidateWeaponCache() drops them too so
+    // a runtime config/translation reload still takes effect.
+    private string? _imageLeft, _imageRight, _bottomMenu, _bottomMenuOnPistol;
+    private string[]? _main, _tLoadout, _ctLoadout, _awp;
+
+    private static string Text(string key, string fallback = "")
+    {
+        var value = Translator.Instance[key];
+        return string.IsNullOrEmpty(value) ? fallback : value;
+    }
+
+    private void EnsureTextCache()
+    {
+        if (_main != null) return;
+        _imageLeft          = Text("menu.left.image");
+        _imageRight         = Text("menu.right.image");
+        _bottomMenu         = Text("menu.bottom.text");
+        _bottomMenuOnPistol = Text("menu.bottom.text.pistol");
+
+        _main = new[]
+        {
+            Text("menu.main.tloadout", "█░ T Loadout ░█"),
+            Text("menu.main.ctloadout", "█░ CT Loadout ░█"),
+            Text("menu.main.awp", "█░ AWP ░█"),
+        };
+
+        _tLoadout = new[]
+        {
+            Text("menu.tprimary", "█ T Primary █"),
+            Text("menu.tsecondary", "█ T Secondary █"),
+            Text("menu.tPistol", "█ T Pistol Round █"),
+            Text("menu.tHalfbuy", "█ T Half Buy █"),
+        };
+
+        _ctLoadout = new[]
+        {
+            Text("menu.ctprimary", "█ CT Primary █"),
+            Text("menu.ctsecondary", "█ CT Secondary █"),
+            Text("menu.ctPistol", "█ CT Pistol Round █"),
+            Text("menu.ctHalfbuy", "█ CT Half Buy █"),
+        };
+
+        _awp = new[]
+        {
+            Text("menu.awp.always", "Always"),
+            Text("menu.awp.never", "Never"),
+        };
+    }
+
+    public void InvalidateWeaponCache()
+    {
+        _tFullBuy = null;
+        _main = null;
+    }
+
+    private void ForgetPlayer(ulong playerid)
+    {
+        menuon.Remove(playerid);
+        mainmenu.Remove(playerid);
+        currentIndexDict.Remove(playerid);
+        buttonPressed.Remove(playerid);
+        _slotById.Remove(playerid);
+    }
 
     private static void Print(CCSPlayerController player, string message)
     {
@@ -87,6 +163,7 @@ public class AdvancedGunMenu
             {
                 buttonPressed.Add(playerid, false);
             }
+            _slotById[playerid] = player.Slot;
         }
         return HookResult.Continue;
     }
@@ -97,46 +174,38 @@ public class AdvancedGunMenu
         // scan so the menu costs zero when unused.
         if (menuon.Count == 0) return;
 
-        var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
-        foreach (var player in playerEntities)
+        EnsureTextCache();
+        EnsureWeaponCache();
+
+        string Imageleft = _imageLeft!;
+        string ImageRight = _imageRight!;
+        string BottomMenu = _bottomMenu!;
+        string BottomMenuOnpistol = _bottomMenuOnPistol!;
+        string[] Main = _main!;
+        string[] Tloadout = _tLoadout!;
+        string[] CTloadout = _ctLoadout!;
+        string[] AWP = _awp!;
+
+        // Snapshot the ids: the draw loop below closes menus (and so mutates menuon) while
+        // it runs, which would invalidate a live enumerator.
+        _tickIds.Clear();
+        foreach (var id in menuon.Keys) _tickIds.Add(id);
+
+        foreach (var playerid in _tickIds)
         {
-            if (player == null || !player.IsValid || !player.PawnIsAlive || player.IsBot || player.IsHLTV) continue;
-            
-            var playerid = player.SteamID;
+            if (!_slotById.TryGetValue(playerid, out var slot)) continue;
+
+            var player = Utilities.GetPlayerFromSlot(slot);
+            if (player == null || !player.IsValid || player.SteamID != playerid)
+            {
+                // Slot recycled by a different player (or now empty) -> stale entry.
+                ForgetPlayer(playerid);
+                continue;
+            }
+            if (!player.PawnIsAlive || player.IsBot || player.IsHLTV) continue;
+
             if (menuon.ContainsKey(playerid))
             {
-                string Imageleft = string.IsNullOrEmpty(Translator.Instance["menu.left.image"]) ? "" : Translator.Instance["menu.left.image"];
-                string ImageRight = string.IsNullOrEmpty(Translator.Instance["menu.right.image"]) ? "" : Translator.Instance["menu.right.image"];
-                string BottomMenu = string.IsNullOrEmpty(Translator.Instance["menu.bottom.text"]) ? "" : Translator.Instance["menu.bottom.text"];
-                string BottomMenuOnpistol = string.IsNullOrEmpty(Translator.Instance["menu.bottom.text.pistol"]) ? "" : Translator.Instance["menu.bottom.text.pistol"];
-
-                string[] Main = { 
-                    string.IsNullOrEmpty(Translator.Instance["menu.main.tloadout"]) ? "█░ T Loadout ░█" : Translator.Instance["menu.main.tloadout"], 
-                    string.IsNullOrEmpty(Translator.Instance["menu.main.ctloadout"]) ? "█░ CT Loadout ░█" : Translator.Instance["menu.main.ctloadout"], 
-                    string.IsNullOrEmpty(Translator.Instance["menu.main.awp"]) ? "█░ AWP ░█" : Translator.Instance["menu.main.awp"]
-                };
-
-                string[] Tloadout = {
-                    string.IsNullOrEmpty(Translator.Instance["menu.tprimary"]) ? "█ T Primary █" : Translator.Instance["menu.tprimary"], 
-                    string.IsNullOrEmpty(Translator.Instance["menu.tsecondary"]) ? "█ T Secondary █" : Translator.Instance["menu.tsecondary"],
-                    string.IsNullOrEmpty(Translator.Instance["menu.tPistol"]) ? "█ T Pistol Round █" : Translator.Instance["menu.tPistol"],
-                    string.IsNullOrEmpty(Translator.Instance["menu.tHalfbuy"]) ? "█ T Half Buy █" : Translator.Instance["menu.tHalfbuy"]
-                };
-                
-                string[] CTloadout = { 
-                    string.IsNullOrEmpty(Translator.Instance["menu.ctprimary"]) ? "█ CT Primary █" : Translator.Instance["menu.ctprimary"], 
-                    string.IsNullOrEmpty(Translator.Instance["menu.ctsecondary"]) ? "█ CT Secondary █" : Translator.Instance["menu.ctsecondary"], 
-                    string.IsNullOrEmpty(Translator.Instance["menu.ctPistol"]) ? "█ CT Pistol Round █" : Translator.Instance["menu.ctPistol"],
-                    string.IsNullOrEmpty(Translator.Instance["menu.ctHalfbuy"]) ? "█ CT Half Buy █" : Translator.Instance["menu.ctHalfbuy"]
-                };
-
-                string[] AWP = { 
-                    string.IsNullOrEmpty(Translator.Instance["menu.awp.always"]) ? "Always" : Translator.Instance["menu.awp.always"], 
-                    string.IsNullOrEmpty(Translator.Instance["menu.awp.never"]) ? "Never" : Translator.Instance["menu.awp.never"]
-                };
-
-
-                EnsureWeaponCache();
                 string[] TFullBuy = _tFullBuy!;
                 string[] TSecondary = _tSecondary!;
                 string[] THalfBuy = _tHalfBuy!;
@@ -407,22 +476,7 @@ public class AdvancedGunMenu
                 {
                     if (mainmenu[playerid] == 0)
                     {
-                        if (currentIndexDict.ContainsKey(playerid))
-                        {
-                            currentIndexDict.Remove(playerid);
-                        }
-                        if(buttonPressed.ContainsKey(playerid))
-                        {
-                            buttonPressed.Remove(playerid);
-                        }
-                        if(mainmenu.ContainsKey(playerid))
-                        {
-                            mainmenu.Remove(playerid);
-                        }
-                        if(menuon.ContainsKey(playerid))
-                        {
-                            menuon.Remove(playerid);
-                        }
+                        ForgetPlayer(playerid);
                     }
 
                     if(mainmenu.ContainsKey(playerid))
@@ -490,7 +544,10 @@ public class AdvancedGunMenu
                     player.ExecuteClientCommand("play sounds/ui/menu_focus.vsnd_c");
                 }
 
-                StringBuilder builder = new StringBuilder();
+                // Reused instance: a fresh StringBuilder per player per tick was one of the
+                // larger allocation sources here.
+                StringBuilder builder = _builder;
+                builder.Clear();
                 if (mainmenu.ContainsKey(playerid))
                 {
                     if(mainmenu[playerid] == 0)
@@ -702,11 +759,7 @@ public class AdvancedGunMenu
         var player = @event.Userid;
 
         if (player == null || !player.IsValid || player.IsBot || player.IsHLTV)return HookResult.Continue;
-        var playerid = player.SteamID;
-        menuon.Remove(playerid);
-        mainmenu.Remove(playerid);
-        currentIndexDict.Remove(playerid);
-        buttonPressed.Remove(playerid);
+        ForgetPlayer(player.SteamID);
 
         return HookResult.Continue;
     }

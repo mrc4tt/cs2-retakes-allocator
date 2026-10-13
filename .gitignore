@@ -10,3 +10,6 @@ riderModule.iml
 data.db
 *.sln
 hm
+.claude/
+.css/
+dist/

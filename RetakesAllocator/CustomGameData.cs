@@ -28,7 +28,7 @@ public class CustomGameData
             Log.Error("Module path is null. Returning without loading custom game data.");
             return;
         }
-        var jsonFilePath = Path.Combine(Configs.Shared.Module, "gamedata/RetakesAllocator_gamedata.json");
+        var jsonFilePath = Configs.ResolveGamedataFilePath(Configs.Shared.Module);
         if (File.Exists(jsonFilePath))
         {
             try

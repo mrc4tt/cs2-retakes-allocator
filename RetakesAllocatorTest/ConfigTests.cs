@@ -119,6 +119,82 @@ public class ConfigTests : BaseTestFixture
     }
 
     [Test]
+    public void TestStrayPluginsConfigsTreeMigratesAndIsRemoved()
+    {
+        // An earlier build with a fixed "../.." hop wrote the config to
+        // plugins/configs/plugins/RetakesAllocator when the plugin was nested under
+        // plugins/disabled/. That config must move to configs/plugins/ and the stray
+        // plugins/configs/ tree must be cleaned up behind it.
+        var root = Path.Combine(Path.GetTempPath(), "ra_stray_" + Guid.NewGuid().ToString("N"));
+        var cssDir = Path.Combine(root, "addons", "counterstrikesharp");
+        var moduleDir = Path.Combine(cssDir, "plugins", "disabled", "RetakesAllocator");
+        var strayRoot = Path.Combine(cssDir, "plugins", "configs");
+        var strayDir = Path.Combine(strayRoot, "plugins", "RetakesAllocator");
+        Directory.CreateDirectory(moduleDir);
+        Directory.CreateDirectory(strayDir);
+
+        File.WriteAllText(Path.Combine(strayDir, "config.json"),
+            Configs.DefaultConfigTemplate.Replace("\"Retakes\"", "\"STRAY_MARKER\""));
+
+        try
+        {
+            var data = Configs.Load(moduleDir, saveAfterLoad: true);
+
+            Assert.That(data.ChatMessagePluginName, Is.EqualTo("STRAY_MARKER"),
+                "the stray config's values should be preserved by the migration");
+            Assert.That(File.Exists(Path.Combine(cssDir, "configs", "plugins", "RetakesAllocator", "config.json")), Is.True,
+                "config should end up in the CSS-standard configs/plugins location");
+            Assert.That(Directory.Exists(strayRoot), Is.False,
+                "the whole stray plugins/configs tree should be removed");
+            Assert.That(Directory.Exists(Path.Combine(cssDir, "plugins")), Is.True,
+                "the real plugins directory must survive pruning");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Test]
+    public void TestPruningStopsAtSharedCssDirectories()
+    {
+        // Migrating out of the plugin folder removes the emptied config/ directory, but must
+        // not touch the plugin folder itself or any other plugin's config.
+        var root = Path.Combine(Path.GetTempPath(), "ra_prune_" + Guid.NewGuid().ToString("N"));
+        var cssDir = Path.Combine(root, "addons", "counterstrikesharp");
+        var moduleDir = Path.Combine(cssDir, "plugins", "disabled", "RetakesAllocator");
+        var cssConfigsPlugins = Path.Combine(cssDir, "configs", "plugins");
+        var otherPluginDir = Path.Combine(cssConfigsPlugins, "SomeOtherPlugin");
+        var ourLegacyDir = Path.Combine(moduleDir, "config");
+        Directory.CreateDirectory(moduleDir);
+        Directory.CreateDirectory(otherPluginDir);
+        Directory.CreateDirectory(ourLegacyDir);
+
+        File.WriteAllText(Path.Combine(otherPluginDir, "SomeOtherPlugin.json"), "{}");
+        File.WriteAllText(Path.Combine(ourLegacyDir, "config.json"), Configs.DefaultConfigTemplate);
+
+        try
+        {
+            Configs.Load(moduleDir, saveAfterLoad: true);
+
+            Assert.That(Directory.Exists(ourLegacyDir), Is.False,
+                "our own now-empty legacy directory should be removed");
+            Assert.That(Directory.Exists(moduleDir), Is.True,
+                "the plugin folder itself must survive pruning");
+            Assert.That(File.Exists(Path.Combine(cssConfigsPlugins, "RetakesAllocator", "config.json")), Is.True,
+                "config should be moved to configs/plugins/RetakesAllocator");
+            Assert.That(Directory.Exists(cssConfigsPlugins), Is.True,
+                "configs/plugins still holds another plugin and must survive");
+            Assert.That(File.Exists(Path.Combine(otherPluginDir, "SomeOtherPlugin.json")), Is.True,
+                "another plugin's config must not be touched");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Test]
     public void TestOnlyDefaultSelectionWarns()
     {
         var warnings = Configs.OverrideConfigDataForTests(
