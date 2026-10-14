@@ -829,6 +829,20 @@ public class RetakesAllocator : BasePlugin
         });
     }
 
+    // The bombsite center message was rebuilt and sent to every alive player on every tick while it was
+    // shown. It stays up 5s per send and its counts change slowly, so send it at most once a second.
+    private float _bombsiteAnnounceLastSend = float.MinValue;
+
+    private bool ShouldSendBombsiteAnnouncement()
+    {
+        var now = Server.CurrentTime;
+        if (now >= _bombsiteAnnounceLastSend && now - _bombsiteAnnounceLastSend < 1.0f)
+            return false;
+
+        _bombsiteAnnounceLastSend = now;
+        return true;
+    }
+
     public void OnTick()
     {
         if (!string.IsNullOrEmpty(Configs.GetConfigData().InGameGunMenuCenterCommands))
@@ -836,12 +850,13 @@ public class RetakesAllocator : BasePlugin
             _advancedGunMenu.OnTick();
         }
 
-        if (_announceBombsite)
+        if (_announceBombsite && ShouldSendBombsiteAnnouncement())
         {
-            var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
-            var countct = Utilities.GetPlayers()
+            // One player list per send instead of an entity scan plus two GetPlayers calls every tick.
+            var playerEntities = Utilities.GetPlayers();
+            var countct = playerEntities
                 .Count(p => p.TeamNum == (int) CsTeam.CounterTerrorist && p.PawnIsAlive && !p.IsHLTV);
-            var countt = Utilities.GetPlayers()
+            var countt = playerEntities
                 .Count(p => p.TeamNum == (int) CsTeam.Terrorist && p.PawnIsAlive && !p.IsHLTV);
             string image = _bombsite == "A" ? Translator.Instance["BombSite.A"] :
                 _bombsite == "B" ? Translator.Instance["BombSite.B"] : "";
@@ -944,6 +959,7 @@ public class RetakesAllocator : BasePlugin
                                 {
                                     _bombsiteAnnounceOneTime = true;
                                     _announceBombsite = true;
+                                    _bombsiteAnnounceLastSend = float.MinValue; // show it right away
                                     AddTimer(Configs.GetConfigData().BombSiteAnnouncementCenterShowTimer, () =>
                                     {
                                         _bombsite = "";
@@ -976,6 +992,7 @@ public class RetakesAllocator : BasePlugin
                                 {
                                     _bombsiteAnnounceOneTime = true;
                                     _announceBombsite = true;
+                                    _bombsiteAnnounceLastSend = float.MinValue; // show it right away
                                     AddTimer(Configs.GetConfigData().BombSiteAnnouncementCenterShowTimer, () =>
                                     {
                                         _bombsite = "";

@@ -117,8 +117,30 @@ public class AdvancedGunMenu
         _main = null;
     }
 
+    // The menu HTML was sent on every tick (64 times a second) while open, even when nothing changed. Each
+    // send makes the client's Panorama re-layout the panel, which costs client FPS. Buttons are still read
+    // every tick; the HTML is only sent when it changed or as a 1s keepalive (it stays up 5s per send).
+    private readonly Dictionary<ulong, (string Html, float SentAt)> _lastMenuHtml = new();
+    private const float MenuKeepAliveSeconds = 1.0f;
+
+    private void SendMenuHtml(CCSPlayerController player, ulong playerid, string html)
+    {
+        var now = Server.CurrentTime;
+        if (_lastMenuHtml.TryGetValue(playerid, out var last)
+            && last.Html == html
+            && now >= last.SentAt
+            && now - last.SentAt < MenuKeepAliveSeconds)
+        {
+            return;
+        }
+
+        player.PrintToCenterHtml(html);
+        _lastMenuHtml[playerid] = (html, now);
+    }
+
     private void ForgetPlayer(ulong playerid)
     {
+        _lastMenuHtml.Remove(playerid);
         menuon.Remove(playerid);
         mainmenu.Remove(playerid);
         currentIndexDict.Remove(playerid);
@@ -749,7 +771,7 @@ public class AdvancedGunMenu
                 }
                 builder.AppendLine("</div>");
                 var centerhtml = builder.ToString();
-                player?.PrintToCenterHtml(centerhtml);
+                SendMenuHtml(player, playerid, centerhtml);
             }
         }
     }
