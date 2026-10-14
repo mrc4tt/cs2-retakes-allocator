@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.4
+- The center gun menu sends its HTML only when it changes (or once a second to keep it up), instead of on every tick while open. Buttons still respond every tick.
+- The bombsite center announcement (`EnableBombSiteAnnouncementCenter`) is sent once a second instead of every tick, without the per-tick entity scan.
+- Both are lighter on players' FPS: each send makes the client re-layout the panel.
+
 ## 2.4.3
 - First fshost release, based on yonilerner/cs2-retakes-allocator 2.4.3.
 - Built against CounterStrikeSharp 1.0.407 (mrc4tt/CounterStrikeSharp).
