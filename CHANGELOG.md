@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.5
+- Gamedata updated for CS2 build 14192.
+
 ## 2.4.4
 - The center gun menu sends its HTML only when it changes (or once a second to keep it up), instead of on every tick while open. Buttons still respond every tick.
 - The bombsite center announcement (`EnableBombSiteAnnouncementCenter`) is sent once a second instead of every tick, without the per-tick entity scan.
