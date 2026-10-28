@@ -1,0 +1,89 @@
+{
+  "roundtype.Pistol": "Pistolet",
+  "roundtype.HalfBuy": "Demi-achat",
+  "roundtype.FullBuy": "Full achat",
+
+  "weapon_type.primary": "Principale",
+  "weapon_type.secondary": "Secondaire",
+
+  "teams.terrorist": "Terroriste",
+  "teams.terrorist_short": "T",
+  "teams.counter_terrorist": "Anti-terroriste",
+  "teams.counter_terrorist_short": "CT",
+
+  "announcement.roundtype": "Manche {0}",
+  "announcement.next_roundtype_set": "La prochaine manche sera une manche {0}.",
+  "announcement.next_roundtype_set_invalid": "Type de manche invalide : {0}.",
+
+  "weapon_preference.cannot_choose": "Les joueurs ne peuvent pas choisir leurs armes sur ce serveur.",
+  "weapon_preference.gun_usage": "Utilisation : !gun <gun>. Les correspondances partielles sont acceptées.\nArmes valides pour {0} :\nPistolets : {1}\nDemi-achat : {2}\nFull achat : {3}",
+  "weapon_preference.invalid_team": "Équipe invalide : {0}.",
+  "weapon_preference.join_team": "Tu dois rejoindre une équipe avant d'utiliser cette commande.",
+  "weapon_preference.not_found": "Arme '{0}' introuvable.",
+  "weapon_preference.not_allowed": "L'arme '{0}' ne peut pas être sélectionnée.",
+  "weapon_preference.invalid_weapon": "Arme invalide : '{0}'.",
+  "weapon_preference.not_valid_for_team": "L'arme '{0}' n'est pas valide pour {1}",
+  "weapon_preference.unset_preference_preferred": "Tu ne recevras plus de '{0}'.",
+  "weapon_preference.unset_preference": "L'arme '{0}' n'est plus ta préférence {1} pour {2}.",
+  "weapon_preference.set_preference_preferred": "Tu recevras désormais une '{0}' quand ce sera ton tour d'avoir un sniper.",
+  "weapon_preference.set_preference": "L'arme '{0}' est maintenant ta préférence {1} pour {2}.",
+  "weapon_preference.receive_next_round": " Tu la recevras à la prochaine manche {0}.",
+  "weapon_preference.not_saved": "Sans Steam ID valide, tes préférences ne seront pas enregistrées.",
+  "weapon_preference.only_vip_can_use": "Seuls les joueurs VIP peuvent utiliser cette commande !",
+
+  "menu.timeout": "Tu n'as pas utilisé le menu depuis {0} secondes !",
+  "menu.exit": "Quitter",
+  "menu.already_in_menu": "Tu utilises déjà un autre menu !",
+
+  "vote_menu.select_vote": "Choisis ton vote !",
+
+  "guns_menu.invalid_steam_id": "Tu ne peux pas définir de préférences d'armes avec un Steam ID invalide.",
+  "guns_menu.complete": "Tu as fini de configurer tes armes !\nLes armes choisies te seront données au début de la prochaine manche !",
+  "guns_menu.select_weapon": "Choisis une arme {0} {1}",
+  "guns_menu.weapon_selected": "Tu as choisi {0} comme arme {1} {2} !",
+  "guns_menu.awp_menu": "Choisis quand recevoir l'AWP",
+  "guns_menu.awp_always": "Toujours",
+  "guns_menu.awp_never": "Jamais",
+  "guns_menu.awp_preference_selected": "Tu as choisi '{0}' pour recevoir l'AWP !",
+
+  "menu.main.tloadout": "█░ Équipement T ░█",
+  "menu.main.ctloadout": "█░ Équipement CT ░█",
+  "menu.main.awp": "█░ AWP ░█",
+
+  "menu.tprimary": "█ T Principale █",
+  "menu.tsecondary": "█ T Secondaire █",
+  "menu.tPistol": "█ T Manche pistolet █",
+  "menu.tHalfbuy": "█ T Demi-achat █",
+
+  "menu.ctprimary": "█ CT Principale █",
+  "menu.ctsecondary": "█ CT Secondaire █",
+  "menu.ctPistol": "█ CT Manche pistolet █",
+  "menu.ctHalfbuy": "█ CT Demi-achat █",
+
+  "menu.awp.always": "Toujours",
+  "menu.awp.never": "Jamais",
+
+  "menu.left.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/left.gif' class=''>",
+  "menu.right.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/right.gif' class=''>",
+  "menu.bottom.text": "<br>           <font color='cyan'>[ WASD - Naviguer ]</font> <br><font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - Quitter ]<br>",
+  "menu.bottom.text.pistol": "<font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - Quitter ]<br>",
+
+  "BombSite.A": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/ASITE.png' class=''>",
+  "BombSite.B": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/BSITE.png' class=''>",
+  "T.Message": "<font color='red'>DÉFENDS</font> <font color='white'>LE SITE</font> <font color='red'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
+  "CT.Message": "<font color='green'>REPRENDS</font> <font color='white'>LE SITE</font> <font color='green'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
+
+  "chatAsite.line1": "{DarkBlue}[Retakes] {Yellow} ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎回︎回︎回︎",
+  "chatAsite.line2": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎回︎",
+  "chatAsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+  "chatAsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎回︎回︎",
+  "chatAsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+  "chatAsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+
+  "chatBsite.line1": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+  "chatBsite.line2": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎",
+  "chatBsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+  "chatBsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ 回︎",
+  "chatBsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎  回︎",
+  "chatBsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎"
+}

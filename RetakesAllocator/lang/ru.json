@@ -1,0 +1,89 @@
+{
+  "roundtype.Pistol": "Пистолетный",
+  "roundtype.HalfBuy": "Полузакуп",
+  "roundtype.FullBuy": "Полный закуп",
+
+  "weapon_type.primary": "Основное",
+  "weapon_type.secondary": "Пистолет",
+
+  "teams.terrorist": "Террористы",
+  "teams.terrorist_short": "T",
+  "teams.counter_terrorist": "Спецназ",
+  "teams.counter_terrorist_short": "CT",
+
+  "announcement.roundtype": "Раунд: {0}",
+  "announcement.next_roundtype_set": "Следующий раунд: {0}.",
+  "announcement.next_roundtype_set_invalid": "Неверный тип раунда: {0}.",
+
+  "weapon_preference.cannot_choose": "На этом сервере игроки не могут выбирать оружие.",
+  "weapon_preference.gun_usage": "Использование: !gun <gun>. Можно ввести часть названия оружия.\nДоступное оружие для {0}:\nПистолеты: {1}\nПолузакуп: {2}\nПолный закуп: {3}",
+  "weapon_preference.invalid_team": "Указана неверная команда: {0}.",
+  "weapon_preference.join_team": "Сначала зайди за команду, потом используй эту команду.",
+  "weapon_preference.not_found": "Оружие '{0}' не найдено.",
+  "weapon_preference.not_allowed": "Оружие '{0}' нельзя выбрать.",
+  "weapon_preference.invalid_weapon": "Неверное оружие: '{0}'.",
+  "weapon_preference.not_valid_for_team": "Оружие '{0}' недоступно для {1}",
+  "weapon_preference.unset_preference_preferred": "Ты больше не будешь получать '{0}'.",
+  "weapon_preference.unset_preference": "Оружие '{0}' больше не выбрано как {1} для {2}.",
+  "weapon_preference.set_preference_preferred": "Теперь ты будешь получать '{0}', когда придёт твоя очередь на снайперку.",
+  "weapon_preference.set_preference": "Оружие '{0}' теперь выбрано как {1} для {2}.",
+  "weapon_preference.receive_next_round": " Ты получишь его в следующем раунде ({0}).",
+  "weapon_preference.not_saved": "Без действительного Steam ID твои настройки не сохранятся.",
+  "weapon_preference.only_vip_can_use": "Эту команду могут использовать только VIP-игроки!",
+
+  "menu.timeout": "Ты не взаимодействовал с меню {0} сек.!",
+  "menu.exit": "Выход",
+  "menu.already_in_menu": "Ты уже используешь другое меню!",
+
+  "vote_menu.select_vote": "Сделай свой выбор!",
+
+  "guns_menu.invalid_steam_id": "С недействительным Steam ID нельзя настроить оружие.",
+  "guns_menu.complete": "Ты закончил настройку оружия!\nВыбранное оружие ты получишь в начале следующего раунда!",
+  "guns_menu.select_weapon": "Выбери оружие: {0} {1}",
+  "guns_menu.weapon_selected": "Ты выбрал {0} как оружие: {1} {2}!",
+  "guns_menu.awp_menu": "Выбери, когда выдавать AWP",
+  "guns_menu.awp_always": "Всегда",
+  "guns_menu.awp_never": "Никогда",
+  "guns_menu.awp_preference_selected": "Ты выбрал '{0}' для выдачи AWP!",
+
+  "menu.main.tloadout": "█░ Снаряжение T ░█",
+  "menu.main.ctloadout": "█░ Снаряжение CT ░█",
+  "menu.main.awp": "█░ AWP ░█",
+
+  "menu.tprimary": "█ T Основное █",
+  "menu.tsecondary": "█ T Пистолет █",
+  "menu.tPistol": "█ T Пистолетный раунд █",
+  "menu.tHalfbuy": "█ T Полузакуп █",
+
+  "menu.ctprimary": "█ CT Основное █",
+  "menu.ctsecondary": "█ CT Пистолет █",
+  "menu.ctPistol": "█ CT Пистолетный раунд █",
+  "menu.ctHalfbuy": "█ CT Полузакуп █",
+
+  "menu.awp.always": "Всегда",
+  "menu.awp.never": "Никогда",
+
+  "menu.left.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/left.gif' class=''>",
+  "menu.right.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/right.gif' class=''>",
+  "menu.bottom.text": "<br>           <font color='cyan'>[ WASD - навигация ]</font> <br><font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - выход ]<br>",
+  "menu.bottom.text.pistol": "<font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - выход ]<br>",
+
+  "BombSite.A": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/ASITE.png' class=''>",
+  "BombSite.B": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/BSITE.png' class=''>",
+  "T.Message": "<font color='red'>ЗАЩИЩАЙ</font> <font color='white'>ПЛЕНТ</font> <font color='red'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
+  "CT.Message": "<font color='green'>РЕТЕЙК</font> <font color='white'>ПЛЕНТА</font> <font color='green'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
+
+  "chatAsite.line1": "{DarkBlue}[Retakes] {Yellow} ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎回︎回︎回︎",
+  "chatAsite.line2": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎回︎",
+  "chatAsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+  "chatAsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎回︎回︎",
+  "chatAsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+  "chatAsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+
+  "chatBsite.line1": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+  "chatBsite.line2": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎",
+  "chatBsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+  "chatBsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ 回︎",
+  "chatBsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎  回︎",
+  "chatBsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎"
+}

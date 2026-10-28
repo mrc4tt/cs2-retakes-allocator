@@ -1,0 +1,89 @@
+{
+  "roundtype.Pistol": "Pistol",
+  "roundtype.HalfBuy": "Halvköp",
+  "roundtype.FullBuy": "Fullköp",
+
+  "weapon_type.primary": "Primär",
+  "weapon_type.secondary": "Sekundär",
+
+  "teams.terrorist": "Terrorist",
+  "teams.terrorist_short": "T",
+  "teams.counter_terrorist": "Counter-Terrorist",
+  "teams.counter_terrorist_short": "CT",
+
+  "announcement.roundtype": "{0}-runda",
+  "announcement.next_roundtype_set": "Nästa runda blir en {0}-runda.",
+  "announcement.next_roundtype_set_invalid": "Ogiltig rundtyp: {0}.",
+
+  "weapon_preference.cannot_choose": "Spelare kan inte välja sina vapen på denna server.",
+  "weapon_preference.gun_usage": "Användning: !gun <gun>. Delvisa träffar för alla vapen hittas.\nGiltiga vapen för {0}:\nPistoler: {1}\nHalvköp: {2}\nFullköp: {3}",
+  "weapon_preference.invalid_team": "Ogiltigt lag angivet: {0}.",
+  "weapon_preference.join_team": "Du måste gå med i ett lag innan du kör detta kommando.",
+  "weapon_preference.not_found": "Vapnet '{0}' hittades inte.",
+  "weapon_preference.not_allowed": "Vapnet '{0}' får inte väljas.",
+  "weapon_preference.invalid_weapon": "Ogiltigt vapen: '{0}'.",
+  "weapon_preference.not_valid_for_team": "Vapnet '{0}' är inte giltigt för {1}",
+  "weapon_preference.unset_preference_preferred": "Du kommer inte längre att få '{0}'.",
+  "weapon_preference.unset_preference": "Vapnet '{0}' är inte längre ditt {1}-val för {2}.",
+  "weapon_preference.set_preference_preferred": "Du får nu en '{0}' när det är din tur att få ett prickskyttegevär.",
+  "weapon_preference.set_preference": "Vapnet '{0}' är nu ditt {1}-val för {2}.",
+  "weapon_preference.receive_next_round": " Du får det i nästa {0}-runda.",
+  "weapon_preference.not_saved": "Utan ett giltigt Steam ID sparas inte dina val.",
+  "weapon_preference.only_vip_can_use": "Endast VIP-spelare kan använda detta kommando!",
+
+  "menu.timeout": "Du interagerade inte med menyn på {0} sekunder!",
+  "menu.exit": "Avsluta",
+  "menu.already_in_menu": "Du använder redan en annan meny!",
+
+  "vote_menu.select_vote": "Välj din röst!",
+
+  "guns_menu.invalid_steam_id": "Du kan inte välja vapen med ett ogiltigt Steam ID.",
+  "guns_menu.complete": "Du är klar med att välja dina vapen!\nDe vapen du har valt får du i början av nästa runda!",
+  "guns_menu.select_weapon": "Välj ett {0} {1}-vapen",
+  "guns_menu.weapon_selected": "Du valde {0} som {1} {2}-vapen!",
+  "guns_menu.awp_menu": "Välj när du ska få AWP",
+  "guns_menu.awp_always": "Alltid",
+  "guns_menu.awp_never": "Aldrig",
+  "guns_menu.awp_preference_selected": "Du valde '{0}' för när du ska få AWP!",
+
+  "menu.main.tloadout": "█░ T-utrustning ░█",
+  "menu.main.ctloadout": "█░ CT-utrustning ░█",
+  "menu.main.awp": "█░ AWP ░█",
+
+  "menu.tprimary": "█ T Primär █",
+  "menu.tsecondary": "█ T Sekundär █",
+  "menu.tPistol": "█ T Pistolrunda █",
+  "menu.tHalfbuy": "█ T Halvköp █",
+
+  "menu.ctprimary": "█ CT Primär █",
+  "menu.ctsecondary": "█ CT Sekundär █",
+  "menu.ctPistol": "█ CT Pistolrunda █",
+  "menu.ctHalfbuy": "█ CT Halvköp █",
+
+  "menu.awp.always": "Alltid",
+  "menu.awp.never": "Aldrig",
+
+  "menu.left.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/left.gif' class=''>",
+  "menu.right.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/right.gif' class=''>",
+  "menu.bottom.text": "<br>           <font color='cyan'>[ WASD - För att navigera ]</font> <br><font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - För att avsluta ]<br>",
+  "menu.bottom.text.pistol": "<font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - För att avsluta ]<br>",
+
+  "BombSite.A": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/ASITE.png' class=''>",
+  "BombSite.B": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/BSITE.png' class=''>",
+  "T.Message": "<font color='red'>FÖRSVARA</font> <font color='white'>SITE</font> <font color='red'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
+  "CT.Message": "<font color='green'>RETAKE</font> <font color='white'>SITE</font> <font color='green'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
+
+  "chatAsite.line1": "{DarkBlue}[Retakes] {Yellow} ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎回︎回︎回︎",
+  "chatAsite.line2": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎回︎",
+  "chatAsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+  "chatAsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎回︎回︎",
+  "chatAsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+  "chatAsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+
+  "chatBsite.line1": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+  "chatBsite.line2": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎",
+  "chatBsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+  "chatBsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ 回︎",
+  "chatBsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎  回︎",
+  "chatBsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎"
+}

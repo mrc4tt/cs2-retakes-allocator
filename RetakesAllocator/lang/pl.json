@@ -1,0 +1,89 @@
+{
+  "roundtype.Pistol": "Pistolet",
+  "roundtype.HalfBuy": "Half Buy",
+  "roundtype.FullBuy": "Full Buy",
+
+  "weapon_type.primary": "Główna",
+  "weapon_type.secondary": "Pomocnicza",
+
+  "teams.terrorist": "Terroryści",
+  "teams.terrorist_short": "T",
+  "teams.counter_terrorist": "Antyterroryści",
+  "teams.counter_terrorist_short": "CT",
+
+  "announcement.roundtype": "Runda: {0}",
+  "announcement.next_roundtype_set": "Następna runda będzie typu {0}.",
+  "announcement.next_roundtype_set_invalid": "Nieprawidłowy typ rundy: {0}.",
+
+  "weapon_preference.cannot_choose": "Na tym serwerze gracze nie mogą wybierać broni.",
+  "weapon_preference.gun_usage": "Użycie: !gun <gun>. Wystarczy część nazwy broni.\nDostępne bronie dla {0}:\nPistolety: {1}\nHalf buy: {2}\nFull buy: {3}",
+  "weapon_preference.invalid_team": "Nieprawidłowa drużyna: {0}.",
+  "weapon_preference.join_team": "Musisz dołączyć do drużyny, zanim użyjesz tej komendy.",
+  "weapon_preference.not_found": "Nie znaleziono broni '{0}'.",
+  "weapon_preference.not_allowed": "Broń '{0}' nie może zostać wybrana.",
+  "weapon_preference.invalid_weapon": "Nieprawidłowa broń: '{0}'.",
+  "weapon_preference.not_valid_for_team": "Broń '{0}' nie jest dostępna dla {1}",
+  "weapon_preference.unset_preference_preferred": "Nie będziesz już dostawać '{0}'.",
+  "weapon_preference.unset_preference": "Broń '{0}' nie jest już twoim wyborem ({1}) dla {2}.",
+  "weapon_preference.set_preference_preferred": "Teraz dostaniesz '{0}', gdy przyjdzie twoja kolej na snajperkę.",
+  "weapon_preference.set_preference": "Broń '{0}' jest teraz twoim wyborem ({1}) dla {2}.",
+  "weapon_preference.receive_next_round": " Dostaniesz ją w następnej rundzie typu {0}.",
+  "weapon_preference.not_saved": "Bez prawidłowego Steam ID twoje ustawienia nie zostaną zapisane.",
+  "weapon_preference.only_vip_can_use": "Tylko gracze VIP mogą używać tej komendy!",
+
+  "menu.timeout": "Nie użyłeś menu przez {0} sekund!",
+  "menu.exit": "Wyjdź",
+  "menu.already_in_menu": "Używasz już innego menu!",
+
+  "vote_menu.select_vote": "Oddaj swój głos!",
+
+  "guns_menu.invalid_steam_id": "Nie możesz ustawić broni bez prawidłowego Steam ID.",
+  "guns_menu.complete": "Skończyłeś ustawiać bronie!\nWybrane bronie dostaniesz na początku następnej rundy!",
+  "guns_menu.select_weapon": "Wybierz broń: {0} {1}",
+  "guns_menu.weapon_selected": "Wybrałeś {0} jako broń {1} {2}!",
+  "guns_menu.awp_menu": "Wybierz, kiedy dawać AWP",
+  "guns_menu.awp_always": "Zawsze",
+  "guns_menu.awp_never": "Nigdy",
+  "guns_menu.awp_preference_selected": "Wybrałeś '{0}' jako ustawienie AWP!",
+
+  "menu.main.tloadout": "█░ Ekwipunek T ░█",
+  "menu.main.ctloadout": "█░ Ekwipunek CT ░█",
+  "menu.main.awp": "█░ AWP ░█",
+
+  "menu.tprimary": "█ T Główna █",
+  "menu.tsecondary": "█ T Pomocnicza █",
+  "menu.tPistol": "█ T Runda pistoletowa █",
+  "menu.tHalfbuy": "█ T Half Buy █",
+
+  "menu.ctprimary": "█ CT Główna █",
+  "menu.ctsecondary": "█ CT Pomocnicza █",
+  "menu.ctPistol": "█ CT Runda pistoletowa █",
+  "menu.ctHalfbuy": "█ CT Half Buy █",
+
+  "menu.awp.always": "Zawsze",
+  "menu.awp.never": "Nigdy",
+
+  "menu.left.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/left.gif' class=''>",
+  "menu.right.image": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/right.gif' class=''>",
+  "menu.bottom.text": "<br>           <font color='cyan'>[ WASD - Nawigacja ]</font> <br><font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - Wyjście ]<br>",
+  "menu.bottom.text.pistol": "<font color='purple'>[ <img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/tab.gif' class=''> - Wyjście ]<br>",
+
+  "BombSite.A": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/ASITE.png' class=''>",
+  "BombSite.B": "<img src='https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/BSITE.png' class=''>",
+  "T.Message": "<font color='red'>BROŃ</font> <font color='white'>SITE</font> <font color='red'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
+  "CT.Message": "<font color='green'>RETAKE</font> <font color='white'>SITE</font> <font color='green'>{0}</font> <br> {1} <br> {2} <font color='red'>T</font>  vs. {3} <font color='#0182FB'>CT</font>",
+
+  "chatAsite.line1": "{DarkBlue}[Retakes] {Yellow} ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎回︎回︎回︎",
+  "chatAsite.line2": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎回︎",
+  "chatAsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+  "chatAsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎回︎回︎",
+  "chatAsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+  "chatAsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ 回︎回︎",
+
+  "chatBsite.line1": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+  "chatBsite.line2": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎回︎",
+  "chatBsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+  "chatBsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ 回︎",
+  "chatBsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎  回︎",
+  "chatBsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎"
+}
