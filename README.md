@@ -1,15 +1,6 @@
-# CS2 Retakes Allocator (fshost build)
-
-> This is fshost's maintained copy of **[yonilerner/cs2-retakes-allocator](https://github.com/yonilerner/cs2-retakes-allocator)**
-> by **yonilerner** and contributors. All credit for the plugin goes to the original authors.
-> It is distributed under the original GPL-3.0 license (see [LICENSE](LICENSE)).
->
-> Differences from upstream: built against the CounterStrikeSharp API fshost runs
-> (mrc4tt/CounterStrikeSharp), works when loaded with `css_plugins load`, and the fixes
-> listed in [CHANGELOG.md](CHANGELOG.md).
+# CS2 Retakes Allocator
 
 ## Retakes
-
 This plugin is made to run alongside B3none's retakes implementation: https://github.com/b3none/cs2-retakes
 
 ## Installation
@@ -32,7 +23,7 @@ This plugin is made to run alongside B3none's retakes implementation: https://gi
     - More info about this in the "Buy Menu" section below
 
 ## Game Data/Signatures (Optional Information)
-This section is optional. If you dont care, you can skip it. The defaults are fine.
+This section is optional. If you don't care, you can skip it. The defaults are fine.
 
 This plugin relies on some function signatures that:
 - Regularly break with game updates:
@@ -42,7 +33,7 @@ This plugin relies on some function signatures that:
   - `GiveNamedItem2`
 
 Custom game data signatures are maintained in https://github.com/mrc4tt/cs2-retakes-allocator/blob/main/Resources/RetakesAllocator_gamedata.json and live on the server as `addons/counterstrikesharp/gamedata/RetakesAllocator.json`:
-- **Keeping it current is CounterStrikeSharp's job** (mrc4tt fork, `PluginGamedataAutoUpdate`, on by default with `AutoUpdateEnabled`). After a CS2 update it replaces only the signatures that no longer resolve, and only with ones published for the game build the server runs.
+- **Keeping it current is CounterStrikeSharp's job** (mrc4tt fork, `PluginGamedataAutoUpdate`, on by default with `AutoUpdateEnabled`). After a CS2 update, it replaces only the signatures that no longer resolve, and only with ones published for the game build the server runs.
 - `AutoUpdateSignatures` (default `true`) downloads the file when it is missing, and never overwrites an existing one. See more below in the "Configuration" section.
 - To install it by hand, download `RetakesAllocator_gamedata.json` from GitHub and save it as `addons/counterstrikesharp/gamedata/RetakesAllocator.json`.
 - A copy left inside the plugin folder by releases before 2.4.3 (`plugins/RetakesAllocator/gamedata/RetakesAllocator_gamedata.json`) is moved to that path, or deleted when it already exists.
@@ -83,8 +74,8 @@ See more info below about the commands in the "Commands" section.
 
 #### AWP Queue
 
-Currently one AWPer will be selected per team as long as at least one person on the team has chosen to get an AWP. AWP
-queue features will be expanded over time, you can take a look at existing Github Issues to see what has been proposed
+Currently, one AWPer will be selected per team as long as at least one person on the team has chosen to get an AWP. AWP
+queue features will be expanded over time, you can take a look at existing GitHub issues to see what has been proposed
 so far.
 
 ### Buy Menu
@@ -105,7 +96,7 @@ again. Either way, `EnableCanAcquireHook` still limits any purchases to weapons 
 
 The config file is located at `addons/counterstrikesharp/configs/plugins/RetakesAllocator/config.json`
 (the standard CounterStrikeSharp config location, so it survives plugin updates). On first
-run the plugin writes a fully commented config file: the settings you usually change are
+run, the plugin writes a fully commented config file: the settings you usually change are
 grouped at the top, each with a short guide — open it in any text editor and read the comments.
 
 > Upgrading from an older version that kept its config in the plugin folder
@@ -300,15 +291,15 @@ room for it*.
 - `EnableNextRoundTypeVoting`: Whether to allow voting for the next round type via `!nextround`. `false` by default.
 - `NumberOfExtraVipChancesForPreferredWeapon`: When randomly selecting preferred weapons per team (ie. "AWP queue"), how
   many extra chances should VIPs get.
-    - The default is 1, meaning VIPs will get 1 extra chance. For example, lets say
-      there are 3 players on the team and this config is set to 1. Normally each person would have a 33% chance of
+    - The default is 1, meaning VIPs will get 1 extra chance. For example, let's say
+      there are 3 players on the team, and this config is set to 1. Normally each person would have a 33% chance of
       getting
       the AWP, but in this case, since one of the players is a VIP, the VIP will get a 50% chance of getting the AWP,
       and
       the other two players will each have 25% chance of getting the AWP.
     - If you set this to 0, there will be no preference for VIPs.
     - If you set this to -1, only VIPs can get the AWP
-- `ChanceForPreferredWeapon`: This allows you to determine chance of players getting preferred weapon. (ie. 100 = %100, 50 = %50)
+- `ChanceForPreferredWeapon`: This allows you to determine chance of players getting the preferred weapon. (ie. 100 = %100, 50 = %50)
 - `AllowedWeaponSelectionTypes`: The types of weapon allocation that are allowed.
     - Choices:
         - `PlayerChoice` - Allow players to choose their preferences for the round type
@@ -329,10 +320,10 @@ room for it*.
     - `Sqlite`
     - `MySql`
 - `DatabaseConnectionString`: How you connect to the database
-    - The connection string for `Sqlite` probably doesnt need to be changed from the default, but you can change it if
+    - The connection string for `Sqlite` probably doesn't need to be changed from the default, but you can change it if
       you want the db file to be in a different location.
         - More info on formatting the string here: https://www.connectionstrings.com/sqlite/
-    - The connection string for `MySql` should be configured per instructions
+    - The connection string for `MySQL` should be configured per instructions
       here: https://www.connectionstrings.com/mysql/
 - `LogLevel`: Desired level of logging. Can be set to `Debug` or `Trace` when collecting information for a bug report.
   You probably want the default, which is `Information`. I strongly recommend against setting any higher than `Warning`.
@@ -355,7 +346,7 @@ room for it*.
 - `EnableRoundTypeAnnouncement`: Whether or not to announce the round type.
 - `EnableRoundTypeAnnouncementCenter`: Whether or not to announce the round type in the center of the users screen. Only
   applies if `EnableRoundTypeAnnouncement` is also set to `true`.
-- `UseOnTickFeatures`: Set to false if you want better performance and dont want any OnTick features, including:
+- `UseOnTickFeatures`: Set to false if you want better performance and don't want any OnTick features, including:
   - Bombsite center announcement
   - Advanced gun menu
 - `AutoUpdateSignatures `: When true, the plugin downloads the custom game data/signatures on startup if `addons/counterstrikesharp/gamedata/RetakesAllocator.json` is missing. An existing file is never replaced: CounterStrikeSharp's gamedata updater keeps it current. If this is disabled and the file is missing, the plugin will fallback to using the default CS# game data/signatures.
