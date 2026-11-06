@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.6
+- `AutoUpdateSignatures` now only downloads `gamedata/RetakesAllocator.json` when it is missing. It used to replace the file from GitHub main whenever it differed, with no check of the game build, which undid the per-signature fixes CounterStrikeSharp's gamedata updater (mrc4tt fork, `PluginGamedataAutoUpdate`) applies at start-up.
+- A gamedata copy left inside the plugin folder by releases before 2.4.3 (`plugins/RetakesAllocator/gamedata/RetakesAllocator_gamedata.json`) is moved to `addons/counterstrikesharp/gamedata/RetakesAllocator.json`, or deleted when that file exists. Nothing read it, and it showed up as broken signatures in CounterStrikeSharp's gamedata status.
+
 ## 2.4.5
 - Gamedata updated for CS2 build 14192.
 

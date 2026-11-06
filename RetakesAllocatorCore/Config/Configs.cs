@@ -245,7 +245,7 @@ public static class Configs
   "AllowAllocationAfterFreezeTime": true,
   "UseOnTickFeatures": true,
   "CapabilityWeaponPaints": true,
-  "AutoUpdateSignatures": true,
+  "AutoUpdateSignatures": true,     // downloads gamedata/RetakesAllocator.json when it is missing; CounterStrikeSharp keeps it current
   "MigrateOnStartup": true,
   "ResetStateOnGameRestart": true,
 
@@ -381,7 +381,7 @@ public static class Configs
 
     /// <summary>
     /// Where the plugin's custom gamedata lives: addons/counterstrikesharp/gamedata/RetakesAllocator.json,
-    /// which is what the release zip ships and what AutoUpdateSignatures refreshes. Falls back to
+    /// which is what the release zip ships and what AutoUpdateSignatures downloads when missing. Falls back to
     /// the old in-plugin-folder location when the counterstrikesharp root cannot be found.
     /// </summary>
     public static string ResolveGamedataFilePath(string modulePath)
@@ -390,6 +390,53 @@ public static class Configs
         return cssRoot is not null
             ? Path.Combine(cssRoot.FullName, "gamedata", $"{PluginName}.json")
             : Path.Combine(modulePath, "gamedata", "RetakesAllocator_gamedata.json");
+    }
+
+    private static readonly string LegacyGamedataFileName = "RetakesAllocator_gamedata.json";
+
+    /// <summary>
+    /// Releases before 2.4.3 shipped the custom gamedata inside the plugin folder
+    /// (plugins/RetakesAllocator/gamedata/RetakesAllocator_gamedata.json). Nothing reads that copy
+    /// once the counterstrikesharp root is found, so it only went stale and showed up as broken
+    /// signatures in CounterStrikeSharp's gamedata status. It is moved to
+    /// addons/counterstrikesharp/gamedata/RetakesAllocator.json when that file does not exist yet,
+    /// and deleted otherwise. Without a counterstrikesharp root the plugin-folder path is the live
+    /// one (ResolveGamedataFilePath's fallback) and is left alone.
+    /// </summary>
+    public static void MigrateLegacyGamedata(string modulePath)
+    {
+        if (FindCssRoot(modulePath) is null)
+        {
+            return;
+        }
+
+        var legacyPath = Path.GetFullPath(Path.Combine(modulePath, "gamedata", LegacyGamedataFileName));
+        if (!File.Exists(legacyPath))
+        {
+            return;
+        }
+
+        var gamedataPath = ResolveGamedataFilePath(modulePath);
+        try
+        {
+            if (File.Exists(gamedataPath))
+            {
+                File.Delete(legacyPath);
+                Log.Info($"Removed the stale legacy gamedata copy '{legacyPath}'; '{gamedataPath}' is the one in use.");
+            }
+            else
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(gamedataPath)!);
+                File.Move(legacyPath, gamedataPath);
+                Log.Info($"Moved legacy gamedata from '{legacyPath}' to '{gamedataPath}'.");
+            }
+
+            PruneEmptyLegacyDirs(legacyPath, modulePath);
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"Could not migrate legacy gamedata '{legacyPath}': {e.Message}.");
+        }
     }
 
     private static DirectoryInfo? FindCssRoot(string modulePath)

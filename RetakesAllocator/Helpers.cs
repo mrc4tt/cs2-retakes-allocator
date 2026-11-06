@@ -202,6 +202,14 @@ public static class Helpers
 
     public static bool IsVip(CCSPlayerController player) => AdminManager.PlayerHasPermissions(player, "@css/vip");
 
+    /// <summary>
+    /// Downloads the custom gamedata file when it is missing, nothing more. An existing file is
+    /// kept current by CounterStrikeSharp's own gamedata updater (mrc4tt fork, PluginGamedataAutoUpdate):
+    /// it checks that the published gamedata is for the running game build and replaces only the
+    /// signatures that no longer resolve. Replacing the whole file from GitHub main here, as this
+    /// used to whenever its hash differed, had no game-build check and undid those fixes on every
+    /// start, because this runs after CounterStrikeSharp has patched the file.
+    /// </summary>
     public static async Task<bool> DownloadMissingFiles()
     {
         if (!Configs.GetConfigData().AutoUpdateSignatures)
@@ -212,65 +220,16 @@ public static class Helpers
 
         string gamedataGithubUrl = "https://raw.githubusercontent.com/mrc4tt/cs2-retakes-allocator/main/Resources/RetakesAllocator_gamedata.json";
         string gamedataFilePath = Configs.ResolveGamedataFilePath(baseFolderPath);
-        string gamedataDirectoryPath = Path.GetDirectoryName(gamedataFilePath)!;
-        
-        return await CheckAndDownloadFile(gamedataFilePath, gamedataGithubUrl, gamedataDirectoryPath);
-    }
-
-    private static async Task<bool> CheckAndDownloadFile(string filePath, string githubUrl, string directoryPath)
-    {
-        if (!File.Exists(filePath))
+        if (File.Exists(gamedataFilePath))
         {
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-            await DownloadFileFromGithub(githubUrl, filePath);
-            return true;
-        }
-
-        bool isFileDifferent = await IsFileDifferent(filePath, githubUrl);
-        if (isFileDifferent)
-        {
-            File.Delete(filePath);
-            await DownloadFileFromGithub(githubUrl, filePath);
-            return true;
-        }
-
-        return false;
-    }
-
-    private static async Task<bool> IsFileDifferent(string localFilePath, string githubUrl)
-    {
-        try
-        {
-            byte[] localFileBytes = await File.ReadAllBytesAsync(localFilePath);
-            string localFileHash = GetFileHash(localFileBytes);
-
-            using (HttpClient client = new HttpClient())
-            {
-                byte[] githubFileBytes = await client.GetByteArrayAsync(githubUrl);
-                string githubFileHash = GetFileHash(githubFileBytes);
-                return localFileHash != githubFileHash;
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Warn($"Error comparing files: {ex.Message}");
             return false;
         }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(gamedataFilePath)!);
+        return await DownloadFileFromGithub(gamedataGithubUrl, gamedataFilePath);
     }
 
-    private static string GetFileHash(byte[] fileBytes)
-    {
-        using (var md5 = System.Security.Cryptography.MD5.Create())
-        {
-            byte[] hashBytes = md5.ComputeHash(fileBytes);
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-        }
-    }
-
-    private static async Task DownloadFileFromGithub(string url, string destinationPath)
+    private static async Task<bool> DownloadFileFromGithub(string url, string destinationPath)
     {
         using (HttpClient client = new HttpClient())
         {
@@ -278,10 +237,13 @@ public static class Helpers
             {
                 byte[] fileBytes = await client.GetByteArrayAsync(url);
                 await File.WriteAllBytesAsync(destinationPath, fileBytes);
+                Log.Info($"Downloaded missing gamedata to '{destinationPath}'.");
+                return true;
             }
             catch (Exception ex)
             {
                 Log.Warn($"Error downloading file: {ex.Message}");
+                return false;
             }
         }
     }

@@ -213,4 +213,70 @@ public class ConfigTests : BaseTestFixture
         ).Validate();
         Assert.That(warnings, Has.Some.Contains("AllowedWeaponSelectionTypes is empty"));
     }
+    private static (string root, string module, string legacy, string current) LegacyGamedataLayout()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ra-gamedata-" + Guid.NewGuid().ToString("N"));
+        var css = Path.Combine(root, "addons", "counterstrikesharp");
+        var module = Path.Combine(css, "plugins", "disabled", "RetakesAllocator");
+        Directory.CreateDirectory(Path.Combine(module, "gamedata"));
+        return (root, module, Path.Combine(module, "gamedata", "RetakesAllocator_gamedata.json"),
+            Path.Combine(css, "gamedata", "RetakesAllocator.json"));
+    }
+
+    [Test]
+    public void TestLegacyGamedataIsMovedWhenNoCurrentFile()
+    {
+        var (root, module, legacy, current) = LegacyGamedataLayout();
+        try
+        {
+            File.WriteAllText(legacy, "{\"legacy\": {}}");
+            Configs.MigrateLegacyGamedata(module);
+            Assert.That(File.Exists(legacy), Is.False);
+            Assert.That(File.ReadAllText(current), Is.EqualTo("{\"legacy\": {}}"));
+            Assert.That(Directory.Exists(Path.Combine(module, "gamedata")), Is.False);
+            Assert.That(Directory.Exists(module), Is.True);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Test]
+    public void TestLegacyGamedataIsDeletedWhenCurrentFileExists()
+    {
+        var (root, module, legacy, current) = LegacyGamedataLayout();
+        try
+        {
+            File.WriteAllText(legacy, "{\"legacy\": {}}");
+            Directory.CreateDirectory(Path.GetDirectoryName(current)!);
+            File.WriteAllText(current, "{\"current\": {}}");
+            Configs.MigrateLegacyGamedata(module);
+            Assert.That(File.Exists(legacy), Is.False);
+            Assert.That(File.ReadAllText(current), Is.EqualTo("{\"current\": {}}"));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Test]
+    public void TestLegacyGamedataIsKeptWithoutCssRoot()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ra-gamedata-" + Guid.NewGuid().ToString("N"));
+        var module = Path.Combine(root, "RetakesAllocator");
+        var legacy = Path.Combine(module, "gamedata", "RetakesAllocator_gamedata.json");
+        Directory.CreateDirectory(Path.GetDirectoryName(legacy)!);
+        try
+        {
+            File.WriteAllText(legacy, "{}");
+            Configs.MigrateLegacyGamedata(module);
+            Assert.That(File.Exists(legacy), Is.True);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
 }

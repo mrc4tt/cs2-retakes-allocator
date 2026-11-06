@@ -41,9 +41,11 @@ This plugin relies on some function signatures that:
 - Are not included in the default CS# signatures:
   - `GiveNamedItem2`
 
-Custom game data signatures are maintained in https://github.com/mrc4tt/cs2-retakes-allocator/blob/main/Resources/RetakesAllocator_gamedata.json. There are a few ways to keep these up to date on your server:
-- If you want the plugin to automatically download the signatures, you can do so by running the plugin with the `AutoUpdateSignatures` config set to `true`. **This is the recommended approach**. See more below in the "Configuration" section.
-- If you want to manually download the signatures, you can do so by downloading the `RetakesAllocator_gamedata.json` file from Github and saving it as `addons/counterstrikesharp/gamedata/RetakesAllocator.json`.
+Custom game data signatures are maintained in https://github.com/mrc4tt/cs2-retakes-allocator/blob/main/Resources/RetakesAllocator_gamedata.json and live on the server as `addons/counterstrikesharp/gamedata/RetakesAllocator.json`:
+- **Keeping it current is CounterStrikeSharp's job** (mrc4tt fork, `PluginGamedataAutoUpdate`, on by default with `AutoUpdateEnabled`). After a CS2 update it replaces only the signatures that no longer resolve, and only with ones published for the game build the server runs.
+- `AutoUpdateSignatures` (default `true`) downloads the file when it is missing, and never overwrites an existing one. See more below in the "Configuration" section.
+- To install it by hand, download `RetakesAllocator_gamedata.json` from GitHub and save it as `addons/counterstrikesharp/gamedata/RetakesAllocator.json`.
+- A copy left inside the plugin folder by releases before 2.4.3 (`plugins/RetakesAllocator/gamedata/RetakesAllocator_gamedata.json`) is moved to that path, or deleted when it already exists.
 
 If you do not want to use any custom game data/signatures, you can disable `AutoUpdateSignatures` and `CapabilityWeaponPaints`. If you do this (and if you previously had downloaded custom game data, make sure to delete the `addons/counterstrikesharp/gamedata/RetakesAllocator.json` file), the plugin will fallback to using the default CS# signatures. See more below in the "Configuration" section.
 
@@ -356,7 +358,7 @@ room for it*.
 - `UseOnTickFeatures`: Set to false if you want better performance and dont want any OnTick features, including:
   - Bombsite center announcement
   - Advanced gun menu
-- `AutoUpdateSignatures `: When true, the plugin will always try to download the latest custom game data/signatures on startup. A game server restart may be required to apply the new signatures after they have been downloaded. If this is disabled, the plugin will fallback to using the default CS# game data/signatures.
+- `AutoUpdateSignatures `: When true, the plugin downloads the custom game data/signatures on startup if `addons/counterstrikesharp/gamedata/RetakesAllocator.json` is missing. An existing file is never replaced: CounterStrikeSharp's gamedata updater keeps it current. If this is disabled and the file is missing, the plugin will fallback to using the default CS# game data/signatures.
 - `CapabilityWeaponPaints`: When true, will try to use the custom game data `GiveNamedItem2` that will maintain weapon paints in non-standard situations. This is enabled by default for backwards compatibility, but is less stable. If this option is enabled, `AutoUpdateSignatures` should also be enabled. If you dont want to use `AutoUpdateSignatures`, at least ensure that the custom game data/signatures are updated correctly, since this `GiveNamedItem2` is not in the default game data/signatures.
 
 ### Commands

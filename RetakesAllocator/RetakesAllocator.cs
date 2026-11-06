@@ -63,6 +63,8 @@ public class RetakesAllocator : BasePlugin
             TrySubscribeToRetakesEvents();
         });
 
+        Configs.MigrateLegacyGamedata(ModuleDirectory);
+
         _ = Task.Run(async () =>
         {
             var downloadedNewGameData = await Helpers.DownloadMissingFiles();
