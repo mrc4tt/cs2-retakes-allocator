@@ -593,7 +593,7 @@ public static class WeaponHelpers
         return IsUsableWeapon(defaultWeapon.Value) ? defaultWeapon : null;
     }
 
-    private static CsItem GetRandomWeaponForAllocationType(WeaponAllocationType allocationType, CsTeam team)
+    private static CsItem? GetRandomWeaponForAllocationType(WeaponAllocationType allocationType, CsTeam team)
     {
         if (team != CsTeam.Terrorist && team != CsTeam.CounterTerrorist)
         {
@@ -609,7 +609,11 @@ public static class WeaponHelpers
             WeaponAllocationType.Preferred => team == CsTeam.Terrorist ? _preferredForT : _preferredForCt,
             _ => _sharedPistols,
         };
-        return Utils.Choice(collectionToCheck.Where(IsUsableWeapon).ToList());
+        // Utils.Choice returns default(CsItem) — Kevlar — for an empty list, which would hand out
+        // armor instead of falling through to the default weapon when every gun of this type was
+        // removed from UsableWeapons. Return null so GetWeaponForAllocationType can fall back.
+        var candidates = collectionToCheck.Where(IsUsableWeapon).ToList();
+        return candidates.Count == 0 ? null : Utils.Choice(candidates);
     }
 
     private static CsItem? GetWeaponForAllocationType(WeaponAllocationType allocationType, CsTeam team,

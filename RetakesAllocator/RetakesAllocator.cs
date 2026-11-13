@@ -34,6 +34,8 @@ public class RetakesAllocator : BasePlugin
 
     private readonly AllocatorMenuManager _allocatorMenuManager = new();
     private readonly AdvancedGunMenu _advancedGunMenu = new();
+    private readonly WeaponPoolAdmin _weaponPoolAdmin;
+    private readonly AdminWeaponsMenu _adminWeaponsMenu;
     private readonly Dictionary<CCSPlayerController, Dictionary<ItemSlotType, CsItem>> _allocatedPlayerItems = new();
     private IRetakesPluginEventSender? RetakesPluginEventSender { get; set; }
 
@@ -43,6 +45,13 @@ public class RetakesAllocator : BasePlugin
     private string _bombsite = "";
     private bool _announceBombsite;
     private bool _bombsiteAnnounceOneTime;
+
+    public RetakesAllocator()
+    {
+        // The center gun menu caches its weapon lists; drop them whenever the pool changes.
+        _weaponPoolAdmin = new WeaponPoolAdmin(() => _advancedGunMenu.InvalidateWeaponCache());
+        _adminWeaponsMenu = new AdminWeaponsMenu(_weaponPoolAdmin);
+    }
 
     #region Setup
 
@@ -475,6 +484,129 @@ public class RetakesAllocator : BasePlugin
         commandInfo.ReplyToCommand($"{MessagePrefix}Reloading config for version {ModuleVersion}");
         Configs.Load(ModuleDirectory);
         RoundTypeManager.Instance.Initialize();
+        _advancedGunMenu.InvalidateWeaponCache();
+        commandInfo.ReplyToCommand($"{MessagePrefix}Config: {Configs.ConfigFilePath}");
+    }
+
+    [ConsoleCommand("css_allocator_weapons", "Opens the admin weapon menu (in game) or lists the weapon pool (console).")]
+    [ConsoleCommand("css_gpool", "Alias of css_allocator_weapons.")]
+    [ConsoleCommand("css_weaponpool", "Alias of css_allocator_weapons.")]
+    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+    [RequiresPermissions("@css/root")]
+    public void OnAllocatorWeaponsCommand(CCSPlayerController? player, CommandInfo commandInfo)
+    {
+        if (player is not null && Helpers.PlayerIsValid(player))
+        {
+            _adminWeaponsMenu.OpenMain(player);
+            return;
+        }
+
+        foreach (var line in WeaponPoolAdmin.DescribePool())
+        {
+            commandInfo.ReplyToCommand($"{MessagePrefix}{line}");
+        }
+
+        commandInfo.ReplyToCommand(
+            $"{MessagePrefix}Change with: css_gpon <weapon...> / css_gpoff <weapon...> / css_gpreset <name>");
+        commandInfo.ReplyToCommand($"{MessagePrefix}Config: {Configs.ConfigFilePath}");
+    }
+
+    [ConsoleCommand("css_allocator_weapon", "Turns a weapon on or off for the whole server and saves it to config.json.")]
+    [ConsoleCommand("css_gpt", "Alias of css_allocator_weapon.")]
+    [CommandHelper(minArgs: 1, usage: "<weapon> [on|off]", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+    [RequiresPermissions("@css/root")]
+    public void OnAllocatorWeaponCommand(CCSPlayerController? player, CommandInfo commandInfo)
+    {
+        var weapon = WeaponCatalog.ParseWeapon(commandInfo.GetArg(1));
+        if (weapon is null)
+        {
+            commandInfo.ReplyToCommand(
+                $"{MessagePrefix}{Translator.Instance["admin_weapons.unknown_weapon", commandInfo.GetArg(1)]}");
+            return;
+        }
+
+        bool? enable = null;
+        if (commandInfo.ArgCount > 2)
+        {
+            switch (commandInfo.GetArg(2).ToLowerInvariant())
+            {
+                case "on" or "1" or "true" or "enable":
+                    enable = true;
+                    break;
+                case "off" or "0" or "false" or "disable":
+                    enable = false;
+                    break;
+                default:
+                    commandInfo.ReplyToCommand($"{MessagePrefix}Usage: css_allocator_weapon <weapon> [on|off]");
+                    return;
+            }
+        }
+
+        _weaponPoolAdmin.SetWeapon(weapon.Value, enable, commandInfo.ReplyToCommand);
+    }
+
+    [ConsoleCommand("css_gpon", "Turns one or more weapons on for the whole server: css_gpon ak47 m4a4 awp")]
+    [CommandHelper(minArgs: 1, usage: "<weapon> [weapon...]", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+    [RequiresPermissions("@css/root")]
+    public void OnWeaponPoolOnCommand(CCSPlayerController? player, CommandInfo commandInfo)
+    {
+        SetWeaponsFromArgs(commandInfo, true);
+    }
+
+    [ConsoleCommand("css_gpoff", "Turns one or more weapons off for the whole server: css_gpoff ump ssg08 scar20")]
+    [CommandHelper(minArgs: 1, usage: "<weapon> [weapon...]", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+    [RequiresPermissions("@css/root")]
+    public void OnWeaponPoolOffCommand(CCSPlayerController? player, CommandInfo commandInfo)
+    {
+        SetWeaponsFromArgs(commandInfo, false);
+    }
+
+    private void SetWeaponsFromArgs(CommandInfo commandInfo, bool enable)
+    {
+        var weapons = new List<CsItem>();
+        for (var i = 1; i < commandInfo.ArgCount; i++)
+        {
+            var arg = commandInfo.GetArg(i);
+            var weapon = WeaponCatalog.ParseWeapon(arg);
+            if (weapon is null)
+            {
+                // Nothing is saved when one name is wrong, so a typo never half-applies a list.
+                commandInfo.ReplyToCommand(
+                    $"{MessagePrefix}{Translator.Instance["admin_weapons.unknown_weapon", arg]}");
+                return;
+            }
+
+            weapons.Add(weapon.Value);
+        }
+
+        _weaponPoolAdmin.SetWeapons(weapons, enable, commandInfo.ReplyToCommand);
+    }
+
+    [ConsoleCommand("css_allocator_preset", "Replaces the weapon pool with a preset and saves it to config.json.")]
+    [ConsoleCommand("css_gpreset", "Alias of css_allocator_preset.")]
+    [CommandHelper(usage: "[standard|nosnipers|noauto|all]", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+    [RequiresPermissions("@css/root")]
+    public void OnAllocatorPresetCommand(CCSPlayerController? player, CommandInfo commandInfo)
+    {
+        if (commandInfo.ArgCount < 2)
+        {
+            foreach (var p in WeaponCatalog.Presets)
+            {
+                commandInfo.ReplyToCommand($"{MessagePrefix}{p.Key}: {p.Description}");
+            }
+
+            return;
+        }
+
+        var preset = WeaponCatalog.FindPreset(commandInfo.GetArg(1));
+        if (preset is null)
+        {
+            commandInfo.ReplyToCommand($"{MessagePrefix}{Translator.Instance["admin_weapons.unknown_preset",
+                commandInfo.GetArg(1), string.Join(", ", WeaponCatalog.Presets.Select(p => p.Key))]}");
+            return;
+        }
+
+        _weaponPoolAdmin.ApplyPreset(preset, commandInfo.ReplyToCommand);
     }
 
     [ConsoleCommand("css_print_config", "Print the entire config or a specific config.")]

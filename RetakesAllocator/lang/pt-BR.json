@@ -84,6 +84,22 @@
   "chatBsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
   "chatBsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ 回︎",
   "chatBsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎  回︎",
-  "chatBsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎"
-  }
-  
+  "chatBsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+
+  "admin_weapons.menu_title": "Server weapon pool ({0}/{1} enabled)",
+  "admin_weapons.category_title": "{0} - select a weapon to toggle it",
+  "admin_weapons.presets": "Presets",
+  "admin_weapons.presets_title": "Apply a weapon preset (replaces the pool)",
+  "admin_weapons.back": "<< Back",
+  "admin_weapons.enable_all": "Enable all {0}",
+  "admin_weapons.disable_all": "Disable all {0}",
+  "admin_weapons.on": "[ON]",
+  "admin_weapons.off": "[OFF]",
+  "admin_weapons.enabled": "[GREEN]{0}[NORMAL] enabled and saved to config.json.",
+  "admin_weapons.disabled": "[RED]{0}[NORMAL] disabled and saved to config.json.",
+  "admin_weapons.preset_applied": "Preset [GREEN]{0}[NORMAL] applied ({1} weapons) and saved to config.json.",
+  "admin_weapons.save_failed": "[RED]Could not save config.json:[NORMAL] {0}",
+  "admin_weapons.empty_slot": "[YELLOW]Warning:[NORMAL] no {0} weapons left for {1}, so those players get none in that slot.",
+  "admin_weapons.unknown_weapon": "Unknown weapon '{0}'.",
+  "admin_weapons.unknown_preset": "Unknown preset '{0}'. Available: {1}"
+}

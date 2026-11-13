@@ -85,5 +85,22 @@
   "chatBsite.line3": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
   "chatBsite.line4": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ 回︎",
   "chatBsite.line5": "{DarkBlue}[Retakes] {Yellow} 回︎回︎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎  回︎",
-  "chatBsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎"
+  "chatBsite.line6": "{DarkBlue}[Retakes] {Yellow} 回︎回︎回︎回︎",
+
+  "admin_weapons.menu_title": "Serverens våbenpulje ({0}/{1} slået til)",
+  "admin_weapons.category_title": "{0} - vælg et våben for at slå det til/fra",
+  "admin_weapons.presets": "Forudindstillinger",
+  "admin_weapons.presets_title": "Anvend en forudindstilling (erstatter puljen)",
+  "admin_weapons.back": "<< Tilbage",
+  "admin_weapons.enable_all": "Slå alle {0} til",
+  "admin_weapons.disable_all": "Slå alle {0} fra",
+  "admin_weapons.on": "[TIL]",
+  "admin_weapons.off": "[FRA]",
+  "admin_weapons.enabled": "[GREEN]{0}[NORMAL] slået til og gemt i config.json.",
+  "admin_weapons.disabled": "[RED]{0}[NORMAL] slået fra og gemt i config.json.",
+  "admin_weapons.preset_applied": "Forudindstilling [GREEN]{0}[NORMAL] anvendt ({1} våben) og gemt i config.json.",
+  "admin_weapons.save_failed": "[RED]Kunne ikke gemme config.json:[NORMAL] {0}",
+  "admin_weapons.empty_slot": "[YELLOW]Advarsel:[NORMAL] ingen {0}-våben tilbage for {1}, så de spillere får intet i den plads.",
+  "admin_weapons.unknown_weapon": "Ukendt våben '{0}'.",
+  "admin_weapons.unknown_preset": "Ukendt forudindstilling '{0}'. Tilgængelige: {1}"
 }

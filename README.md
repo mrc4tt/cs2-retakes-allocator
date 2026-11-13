@@ -105,8 +105,51 @@ grouped at the top, each with a short guide — open it in any text editor and r
 
 **Comments are allowed.** You can keep or add `// like this` comments and trailing
 commas in `config.json`; the plugin ignores them when reading. The plugin never
-rewrites your config file, so your comments are preserved across restarts. Any config
+rewrites your config file on its own, so your comments are preserved across restarts. Any config
 key you remove falls back to its built-in default.
+
+> Where is my config? Plugin versions **2.4.3 and newer** use
+> `addons/counterstrikesharp/configs/plugins/RetakesAllocator/config.json`. Older versions use
+> `addons/counterstrikesharp/plugins/RetakesAllocator/config/config.json`. The server console prints
+> `Config path resolved to '...'` on load, and `!reload_allocator_config` replies with the path.
+
+#### Changing the weapon pool without FTP
+
+Root admins (`@css/root`) can choose which weapons are on the server (`UsableWeapons`) without
+editing files:
+
+- `!allocator_weapons` in chat opens a menu: pick a category (Pistols, SMGs, Shotguns, Machine guns,
+  Rifles, Snipers), then toggle single weapons or the whole category. There is also a **Presets** page.
+- From the server console or RCON:
+    - `css_allocator_weapons` lists what is on and off.
+    - `css_allocator_weapon <weapon> [on|off]` turns one weapon on or off (no `on|off` = toggle).
+      Names like `ump`, `UMP-45`, `ssg08`, `scout`, `m4a4`, `m4a1-s` all work.
+    - `css_allocator_preset <name>` replaces the pool with a preset; with no name it lists them.
+
+Short aliases (in chat with `!`, in console/RCON with `css_`):
+
+| Alias                          | Same as                                    | Example                     |
+|--------------------------------|--------------------------------------------|-----------------------------|
+| `!gpool`, `!weaponpool`           | `!allocator_weapons` (menu / list)         | `!gpool`                       |
+| `!gpon <weapon...>`            | turn one or more weapons on                | `!gpon ak47 m4a4 awp`       |
+| `!gpoff <weapon...>`           | turn one or more weapons off               | `!gpoff ump ssg08 scar20 g3sg1` |
+| `!gpt <weapon> [on\|off]`      | `!allocator_weapon` (toggle)               | `!gpt bizon`                |
+| `!gpreset [name]`              | `!allocator_preset`                        | `!gpreset standard`         |
+
+(`gp` = gun pool; deliberately not `!wp`, which WeaponPaints uses.) `!gpon` / `!gpoff` save nothing if one of the names is unknown, so a typo never half-applies a list.
+
+| Preset      | Weapons                                                                                  |
+|-------------|------------------------------------------------------------------------------------------|
+| `standard`  | AK-47, M4A4, M4A1-S, FAMAS, Galil AR, AWP, MAC-10, MP9, Glock, USP-S, P2000, P250, Tec-9, Five-SeveN, Desert Eagle |
+| `nosnipers` | Everything except AWP, SSG 08, SCAR-20, G3SG1                                            |
+| `noauto`    | Everything except SCAR-20, G3SG1                                                         |
+| `all`       | Every weapon (default)                                                                   |
+
+Changes apply immediately and are saved to `config.json`. Only the `UsableWeapons` list is
+rewritten; your comments and every other setting stay as they are, and the previous file is kept as
+`config.json.bak`. The admin gets a warning when a round type has no weapon left for a team (for example
+all SMGs off → nothing on half-buy rounds). A `DefaultWeapons` entry for a weapon that is turned off is
+skipped.
 
 > Common question — *"How do I stop everyone getting the same M4/Deagle every round?"*
 > Weapons are chosen in the order `PlayerChoice` → `Random` → `Default` (see
@@ -369,4 +412,10 @@ You can use the following commands to select specific weapon preferences per-use
   is `false` by default.
 - `!setnextround <P|H|F>` - For admins only. Force the next round to be the selected type.
 - `!reload_allocator_config` - For admins only. Reload the JSON config in-place.
+- `!allocator_weapons` - For root admins only. Menu to turn weapons on/off for the server (see
+  [Changing the weapon pool without FTP](#changing-the-weapon-pool-without-ftp)).
+- `!allocator_weapon <weapon> [on|off]` / `!allocator_preset <name>` - For root admins only. The same from chat,
+  console or RCON (`css_` prefix in console).
+- Short aliases for root admins: `!gpool` (menu), `!gpon <weapon...>`, `!gpoff <weapon...>`, `!gpt <weapon> [on|off]`,
+  `!gpreset [name]`.
 - `!print_config <name>` - For admins only. Print out the config with the given name.

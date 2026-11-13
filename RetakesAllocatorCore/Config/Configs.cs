@@ -68,6 +68,11 @@ public static class Configs
   // │   • A gun NOT in this list is never given, and (with EnableCanAcquireHook  │
   // │     = true, see ADVANCED) cannot be bought either.                         │
   // │   • Grouped by type below just for readability — order does not matter.    │
+  // │   • No FTP? Root admins can change this list in game with                  │
+  // │     !allocator_weapons (menu), or from the console / RCON with             │
+  // │     css_allocator_weapon <gun> on|off  and  css_allocator_preset <name>    │
+  // │     (presets: standard, nosnipers, noauto, all). Saved to this file.       │
+  // │     Short: !gpool (menu), !gpoff ump ssg08, !gpon ak47, !gpreset standard  │
   // └──────────────────────────────────────────────────────────────────────────┘
   "UsableWeapons": [
     // Pistols
@@ -553,6 +558,44 @@ public static class Configs
         configData.Validate();
         _configData = configData;
         return _configData;
+    }
+
+    /// <summary>The config.json in use, or null before the first Load.</summary>
+    public static string? ConfigFilePath => _configFilePath;
+
+    /// <summary>
+    /// Replaces the UsableWeapons list in config.json (used by the admin weapon menu and the
+    /// css_allocator_weapon / css_allocator_preset commands) and makes it live immediately.
+    /// Only the UsableWeapons array is rewritten — comments and every other setting in the file are
+    /// kept as they are, including edits made by hand since the last load. The previous file is kept
+    /// as config.json.bak, and nothing is written if the result would not load.
+    /// </summary>
+    public static ConfigData SaveUsableWeapons(IEnumerable<CsItem> usableWeapons)
+    {
+        if (_configFilePath is null)
+        {
+            throw new Exception("Config not yet loaded.");
+        }
+
+        var current = File.Exists(_configFilePath) ? File.ReadAllText(_configFilePath) : DefaultConfigTemplate;
+        var updated = UsableWeaponsWriter.Rewrite(current, usableWeapons);
+
+        // Parse before touching the file, so a bad rewrite can never leave the server without a config.
+        var newConfig = JsonSerializer.Deserialize<ConfigData>(updated, SerializationOptions)
+                        ?? throw new Exception("Updated config could not be parsed.");
+
+        if (File.Exists(_configFilePath))
+        {
+            File.Copy(_configFilePath, _configFilePath + ".bak", overwrite: true);
+        }
+
+        var tempPath = _configFilePath + ".tmp";
+        File.WriteAllText(tempPath, updated);
+        File.Move(tempPath, _configFilePath, overwrite: true);
+
+        newConfig.Validate();
+        _configData = newConfig;
+        return newConfig;
     }
 
     private static void SaveConfigData(ConfigData configData)
