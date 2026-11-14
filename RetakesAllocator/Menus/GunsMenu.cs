@@ -20,6 +20,7 @@ public class GunsMenu : AbstractBaseMenu
 
     public override void OpenMenu(CCSPlayerController player)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (Helpers.GetSteamId(player) == 0)
         {
             Print(player, Translator.Instance["guns_menu.invalid_steam_id"]);
@@ -38,6 +39,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnMenuTimeout(CCSPlayerController player)
     {
+        using var langScope = Translator.PlayerScope(player);
         Print(player, Translator.Instance["menu.timeout", MenuTimeout]);
 
         PlayersInMenu.Remove(player);
@@ -59,6 +61,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnMenuComplete(CCSPlayerController player)
     {
+        using var langScope = Translator.PlayerScope(player);
         Print(player, Translator.Instance["guns_menu.complete"]);
 
         PlayersInMenu.Remove(player);
@@ -70,6 +73,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnSelectExit(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -103,6 +107,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnTPrimarySelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -140,6 +145,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnTSecondarySelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -176,6 +182,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnCtPrimarySelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -212,6 +219,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnCtSecondarySelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -249,6 +257,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnTPistolSelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -286,6 +295,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnCtPistolSelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -322,6 +332,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnTHalfBuySelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -358,6 +369,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnCTHalfBuySelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;
@@ -396,6 +408,7 @@ public class GunsMenu : AbstractBaseMenu
 
     private void OnGiveAwpSelect(CCSPlayerController player, ChatMenuOption option)
     {
+        using var langScope = Translator.PlayerScope(player);
         if (!PlayersInMenu.Contains(player))
         {
             return;

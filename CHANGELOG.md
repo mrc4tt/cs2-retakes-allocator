@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.8
+- Every message a player sees is now in that player's own language (`!lang`), not the server language: chat replies, menus, the center gun menu, round type and bombsite announcements, and next round voting. Logs and console output stay in the server language.
+- The next round vote messages (vote started, vote registered, vote result) and the "valid player only" / "voting disabled" replies are now translated in all languages.
+- New languages: Turkish (`tr`) and Albanian (`sq`).
+
 ## 2.4.7
 - Root admins can change the weapon pool (`UsableWeapons`) without FTP: `!allocator_weapons` opens a chat menu (per category, toggle a weapon or the whole category, presets), and `css_allocator_weapons` / `css_allocator_weapon <weapon> [on|off]` / `css_allocator_preset <name>` work from the console and RCON.
 - Short aliases: `!gpool` / `!weaponpool` (menu), `!gpon <weapon...>` and `!gpoff <weapon...>` (several weapons in one go, e.g. `!gpoff ump ssg08 scar20 g3sg1`), `!gpt <weapon> [on|off]`, `!gpreset [name]`. All also work as `css_...` in the console and RCON.

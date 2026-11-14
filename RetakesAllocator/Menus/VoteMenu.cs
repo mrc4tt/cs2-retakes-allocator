@@ -49,7 +49,7 @@ public class VoteMenu : AbstractBaseMenu
     private void OnMenuTimeout(CCSPlayerController player)
     {
         Helpers.WriteNewlineDelimited(
-            Translator.Instance["menu.timeout", MenuTimeout],
+            Translator.Instance.ForPlayer(player, "menu.timeout", MenuTimeout),
             player.PrintToChat
         );
 

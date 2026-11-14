@@ -21,6 +21,7 @@ public class AdminWeaponsMenu
 
     public void OpenMain(CCSPlayerController player)
     {
+        using var langScope = Translator.PlayerScope(player);
         var pool = WeaponPoolAdmin.CurrentPool();
         var total = WeaponCatalog.AllCatalogWeapons.Count;
         var enabled = WeaponCatalog.AllCatalogWeapons.Count(pool.Contains);
@@ -39,6 +40,7 @@ public class AdminWeaponsMenu
 
     private void OpenCategory(CCSPlayerController player, WeaponCatalog.WeaponCategory category)
     {
+        using var langScope = Translator.PlayerScope(player);
         var menu = new ChatMenu(Translator.Instance["admin_weapons.category_title", category.DisplayName]);
         foreach (var weapon in category.Weapons)
         {
@@ -47,6 +49,7 @@ public class AdminWeaponsMenu
                 : Translator.Instance["admin_weapons.off"];
             menu.AddMenuOption($"{state} {WeaponCatalog.GetDisplayName(weapon)}", (p, _) =>
             {
+                using var langScope = Translator.PlayerScope(p);
                 _admin.SetWeapon(weapon, null, p.PrintToChat);
                 OpenCategory(p, category);
             });
@@ -54,11 +57,13 @@ public class AdminWeaponsMenu
 
         menu.AddMenuOption(Translator.Instance["admin_weapons.enable_all", category.DisplayName], (p, _) =>
         {
+            using var langScope = Translator.PlayerScope(p);
             _admin.SetCategory(category, true, p.PrintToChat);
             OpenCategory(p, category);
         });
         menu.AddMenuOption(Translator.Instance["admin_weapons.disable_all", category.DisplayName], (p, _) =>
         {
+            using var langScope = Translator.PlayerScope(p);
             _admin.SetCategory(category, false, p.PrintToChat);
             OpenCategory(p, category);
         });
@@ -69,11 +74,13 @@ public class AdminWeaponsMenu
 
     private void OpenPresets(CCSPlayerController player)
     {
+        using var langScope = Translator.PlayerScope(player);
         var menu = new ChatMenu(Translator.Instance["admin_weapons.presets_title"]);
         foreach (var preset in WeaponCatalog.Presets)
         {
             menu.AddMenuOption($"{preset.Key} - {preset.Description}", (p, _) =>
             {
+                using var langScope = Translator.PlayerScope(p);
                 _admin.ApplyPreset(preset, p.PrintToChat);
                 OpenMain(p);
             });

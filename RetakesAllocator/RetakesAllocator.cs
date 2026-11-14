@@ -4,6 +4,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Core.Capabilities;
+using CounterStrikeSharp.API.Core.Translations;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities;
@@ -301,13 +302,13 @@ public class RetakesAllocator : BasePlugin
     {
         if (!Helpers.PlayerIsValid(player))
         {
-            commandInfo.ReplyToCommand($"{MessagePrefix}This command can only be executed by a valid player.");
+            commandInfo.ReplyToCommand($"{MessagePrefix}{Translator.Instance.ForPlayer(player, "command.player_only")}");
             return;
         }
 
         if (!Configs.GetConfigData().EnableNextRoundTypeVoting)
         {
-            commandInfo.ReplyToCommand($"{MessagePrefix}Next round voting is disabled.");
+            commandInfo.ReplyToCommand($"{MessagePrefix}{Translator.Instance.ForPlayer(player, "vote.disabled")}");
             return;
         }
 
@@ -331,6 +332,7 @@ public class RetakesAllocator : BasePlugin
         var playerId = Helpers.GetSteamId(player);
         var currentTeam = player!.Team;
 
+        using var langScope = Translator.PlayerScope(player);
         var result = OnWeaponCommandHelper.Handle(
             Helpers.CommandInfoToArgList(commandInfo),
             playerId,
@@ -376,7 +378,7 @@ public class RetakesAllocator : BasePlugin
         var playerId = Helpers.GetSteamId(player);
         if (playerId == 0)
         {
-            commandInfo.ReplyToCommand("Cannot save preferences with invalid Steam ID.");
+            commandInfo.ReplyToCommand(Translator.Instance.ForPlayer(player, "guns_menu.invalid_steam_id"));
             return;
         }
 
@@ -384,7 +386,7 @@ public class RetakesAllocator : BasePlugin
 
         if (Configs.GetConfigData().NumberOfExtraVipChancesForPreferredWeapon == -1 && !Helpers.IsVip(player))
         {
-            var message = Translator.Instance["weapon_preference.only_vip_can_use"];
+            var message = Translator.Instance.ForPlayer(player, "weapon_preference.only_vip_can_use");
             commandInfo.ReplyToCommand($"{MessagePrefix}{message}");
             return;
         }
@@ -395,9 +397,12 @@ public class RetakesAllocator : BasePlugin
         // deliver the reply on the next frame instead.
         var currentRoundType = RoundTypeManager.Instance.GetCurrentRoundType();
         var playerSlot = player.Slot;
+        // The reply is built off the game thread: capture the player's language here.
+        var playerCulture = player.GetLanguage();
 
         _ = Task.Run(async () =>
         {
+            using var langScope = Translator.CultureScope(playerCulture);
             Tuple<string, CsItem?> result;
             try
             {
@@ -445,6 +450,7 @@ public class RetakesAllocator : BasePlugin
         var playerId = Helpers.GetSteamId(player);
         var currentTeam = player!.Team;
 
+        using var langScope = Translator.PlayerScope(player);
         var result = OnWeaponCommandHelper.Handle(
             Helpers.CommandInfoToArgList(commandInfo),
             playerId,
@@ -465,12 +471,13 @@ public class RetakesAllocator : BasePlugin
         var roundType = RoundTypeHelpers.ParseRoundType(roundTypeInput);
         if (roundType is null)
         {
-            var message = Translator.Instance["announcement.next_roundtype_set_invalid", roundTypeInput];
+            var message = Translator.Instance.ForPlayer(player, "announcement.next_roundtype_set_invalid", roundTypeInput);
             commandInfo.ReplyToCommand($"{MessagePrefix}{message}");
         }
         else
         {
             RoundTypeManager.Instance.SetNextRoundTypeOverride(roundType);
+            using var langScope = Translator.PlayerScope(player);
             var roundTypeName = RoundTypeHelpers.TranslateRoundTypeName(roundType.Value);
             var message = Translator.Instance["announcement.next_roundtype_set", roundTypeName];
             commandInfo.ReplyToCommand($"{MessagePrefix}{message}");
@@ -495,6 +502,8 @@ public class RetakesAllocator : BasePlugin
     [RequiresPermissions("@css/root")]
     public void OnAllocatorWeaponsCommand(CCSPlayerController? player, CommandInfo commandInfo)
     {
+        // Replies go to the admin who ran it: their language (server language from the console).
+        using var langScope = Translator.PlayerScope(player);
         if (player is not null && Helpers.PlayerIsValid(player))
         {
             _adminWeaponsMenu.OpenMain(player);
@@ -517,6 +526,8 @@ public class RetakesAllocator : BasePlugin
     [RequiresPermissions("@css/root")]
     public void OnAllocatorWeaponCommand(CCSPlayerController? player, CommandInfo commandInfo)
     {
+        // Replies go to the admin who ran it: their language (server language from the console).
+        using var langScope = Translator.PlayerScope(player);
         var weapon = WeaponCatalog.ParseWeapon(commandInfo.GetArg(1));
         if (weapon is null)
         {
@@ -550,6 +561,8 @@ public class RetakesAllocator : BasePlugin
     [RequiresPermissions("@css/root")]
     public void OnWeaponPoolOnCommand(CCSPlayerController? player, CommandInfo commandInfo)
     {
+        // Replies go to the admin who ran it: their language (server language from the console).
+        using var langScope = Translator.PlayerScope(player);
         SetWeaponsFromArgs(commandInfo, true);
     }
 
@@ -558,6 +571,8 @@ public class RetakesAllocator : BasePlugin
     [RequiresPermissions("@css/root")]
     public void OnWeaponPoolOffCommand(CCSPlayerController? player, CommandInfo commandInfo)
     {
+        // Replies go to the admin who ran it: their language (server language from the console).
+        using var langScope = Translator.PlayerScope(player);
         SetWeaponsFromArgs(commandInfo, false);
     }
 
@@ -588,6 +603,8 @@ public class RetakesAllocator : BasePlugin
     [RequiresPermissions("@css/root")]
     public void OnAllocatorPresetCommand(CCSPlayerController? player, CommandInfo commandInfo)
     {
+        // Replies go to the admin who ran it: their language (server language from the console).
+        using var langScope = Translator.PlayerScope(player);
         if (commandInfo.ArgCount < 2)
         {
             foreach (var p in WeaponCatalog.Presets)
@@ -880,6 +897,7 @@ public class RetakesAllocator : BasePlugin
             var itemName = Enum.GetName(item);
             if (itemName is not null)
             {
+                using var langScope = Translator.PlayerScope(player);
                 var message = OnWeaponCommandHelper.Handle(
                     new List<string> {itemName},
                     Helpers.GetSteamId(player),
@@ -943,13 +961,17 @@ public class RetakesAllocator : BasePlugin
         if (Configs.GetConfigData().EnableRoundTypeAnnouncement)
         {
             var roundType = RoundTypeManager.Instance.GetCurrentRoundType()!.Value;
-            var roundTypeName = RoundTypeHelpers.TranslateRoundTypeName(roundType);
-            var message = Translator.Instance["announcement.roundtype", roundTypeName];
-            Server.PrintToChatAll($"{MessagePrefix}{message}");
+            Translator.ForEachHuman(player =>
+            {
+                var roundTypeName = RoundTypeHelpers.TranslateRoundTypeName(roundType);
+                player.PrintToChat($"{MessagePrefix}{Translator.Instance["announcement.roundtype", roundTypeName]}");
+            });
             if (Configs.GetConfigData().EnableRoundTypeAnnouncementCenter)
             {
                 foreach (var player in allPlayers)
                 {
+                    using var langScope = Translator.PlayerScope(player);
+                    var roundTypeName = RoundTypeHelpers.TranslateRoundTypeName(roundType);
                     player.PrintToCenter(
                         $"{MessagePrefix}{Translator.Instance["center.announcement.roundtype", roundTypeName]}");
                 }
@@ -992,11 +1014,13 @@ public class RetakesAllocator : BasePlugin
                 .Count(p => p.TeamNum == (int) CsTeam.CounterTerrorist && p.PawnIsAlive && !p.IsHLTV);
             var countt = playerEntities
                 .Count(p => p.TeamNum == (int) CsTeam.Terrorist && p.PawnIsAlive && !p.IsHLTV);
-            string image = _bombsite == "A" ? Translator.Instance["BombSite.A"] :
-                _bombsite == "B" ? Translator.Instance["BombSite.B"] : "";
             foreach (var player in playerEntities)
             {
                 if (!player.IsValid || !player.PawnIsAlive || player.IsBot || player.IsHLTV) continue;
+
+                using var langScope = Translator.PlayerScope(player);
+                string image = _bombsite == "A" ? Translator.Instance["BombSite.A"] :
+                    _bombsite == "B" ? Translator.Instance["BombSite.B"] : "";
 
                 if (player.TeamNum == (byte) CsTeam.Terrorist &&
                     !Configs.GetConfigData().BombSiteAnnouncementCenterToCTOnly)
@@ -1105,12 +1129,13 @@ public class RetakesAllocator : BasePlugin
 
                         if (Configs.GetConfigData().EnableBombSiteAnnouncementChat)
                         {
-                            Server.PrintToChatAll(Localizer["chatAsite.line1"]);
-                            Server.PrintToChatAll(Localizer["chatAsite.line2"]);
-                            Server.PrintToChatAll(Localizer["chatAsite.line3"]);
-                            Server.PrintToChatAll(Localizer["chatAsite.line4"]);
-                            Server.PrintToChatAll(Localizer["chatAsite.line5"]);
-                            Server.PrintToChatAll(Localizer["chatAsite.line6"]);
+                            Translator.ForEachHuman(p =>
+                            {
+                                for (var line = 1; line <= 6; line++)
+                                {
+                                    p.PrintToChat(Localizer[$"chatAsite.line{line}"]);
+                                }
+                            });
                         }
 
                         break;
@@ -1138,12 +1163,13 @@ public class RetakesAllocator : BasePlugin
 
                         if (Configs.GetConfigData().EnableBombSiteAnnouncementChat)
                         {
-                            Server.PrintToChatAll(Localizer["chatBsite.line1"]);
-                            Server.PrintToChatAll(Localizer["chatBsite.line2"]);
-                            Server.PrintToChatAll(Localizer["chatBsite.line3"]);
-                            Server.PrintToChatAll(Localizer["chatBsite.line4"]);
-                            Server.PrintToChatAll(Localizer["chatBsite.line5"]);
-                            Server.PrintToChatAll(Localizer["chatBsite.line6"]);
+                            Translator.ForEachHuman(p =>
+                            {
+                                for (var line = 1; line <= 6; line++)
+                                {
+                                    p.PrintToChat(Localizer[$"chatBsite.line{line}"]);
+                                }
+                            });
                         }
 
                         break;

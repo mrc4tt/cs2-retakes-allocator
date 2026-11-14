@@ -38,6 +38,8 @@ public class AllocatorMenuManager
 
     public bool OpenMenuForPlayer(CCSPlayerController player, MenuType menuType)
     {
+        // Menu titles, options and replies are built in the player's language.
+        using var langScope = Translator.PlayerScope(player);
         if (MenuAlreadyOpenCheck(player))
         {
             return false;

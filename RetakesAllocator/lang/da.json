@@ -102,5 +102,14 @@
   "admin_weapons.save_failed": "[RED]Kunne ikke gemme config.json:[NORMAL] {0}",
   "admin_weapons.empty_slot": "[YELLOW]Advarsel:[NORMAL] ingen {0}-våben tilbage for {1}, så de spillere får intet i den plads.",
   "admin_weapons.unknown_weapon": "Ukendt våben '{0}'.",
-  "admin_weapons.unknown_preset": "Ukendt forudindstilling '{0}'. Tilgængelige: {1}"
+  "admin_weapons.unknown_preset": "Ukendt forudindstilling '{0}'. Tilgængelige: {1}",
+
+  "command.player_only": "Denne kommando kan kun bruges af en gyldig spiller.",
+  "vote.disabled": "Afstemning om næste runde er slået fra.",
+  "vote.prefix": "[Afstemning om {0}] ",
+  "vote.for_next_round": "næste runde",
+  "vote.started": "En afstemning er startet! Skriv {0} for at stemme!",
+  "vote.registered": "Din stemme er registreret!",
+  "vote.failed_not_enough": "Afstemningen mislykkedes: For få spillere stemte!",
+  "vote.complete_next_round": "Afstemningen er slut! Næste runde bliver {0}!"
 }
