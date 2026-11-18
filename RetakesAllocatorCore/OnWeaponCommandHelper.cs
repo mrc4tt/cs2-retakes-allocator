@@ -130,12 +130,12 @@ public class OnWeaponCommandHelper
         {
             if (isPreferred)
             {
-                _ = Queries.SetPreferredWeaponPreferenceAsync(userId, null);
+                Queries.LogFailure(Queries.SetPreferredWeaponPreferenceAsync(userId, null));
                 return Ret(Translator.Instance["weapon_preference.unset_preference_preferred", weapon]);
             }
             else
             {
-                _ = Queries.SetWeaponPreferenceForUserAsync(userId, team, allocationType.Value, null);
+                Queries.LogFailure(Queries.SetWeaponPreferenceForUserAsync(userId, team, allocationType.Value, null));
                 return Ret(
                     Translator.Instance["weapon_preference.unset_preference", weapon, allocationType.Value, team]);
             }
@@ -144,13 +144,13 @@ public class OnWeaponCommandHelper
         string message;
         if (isPreferred)
         {
-            _ = Queries.SetPreferredWeaponPreferenceAsync(userId, weapon);
+            Queries.LogFailure(Queries.SetPreferredWeaponPreferenceAsync(userId, weapon));
             // If we ever add more preferred weapons, we need to change the wording of "sniper" here
             message = Translator.Instance["weapon_preference.set_preference_preferred", weapon];
         }
         else
         {
-            _ = Queries.SetWeaponPreferenceForUserAsync(userId, team, allocationType.Value, weapon);
+            Queries.LogFailure(Queries.SetWeaponPreferenceForUserAsync(userId, team, allocationType.Value, weapon));
             message = Translator.Instance["weapon_preference.set_preference", weapon, allocationType.Value, team];
         }
 

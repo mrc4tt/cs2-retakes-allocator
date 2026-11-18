@@ -8,7 +8,8 @@ public class Queries
 {
     public static async Task<UserSetting?> GetUserSettings(ulong userId)
     {
-        return await Db.GetInstance().UserSettings.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
+        await using var db = Db.Create();
+        return await db.UserSettings.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
     }
 
     private static async Task<UserSetting?> UpsertUserSettings(ulong userId, Action<UserSetting> mutation)
@@ -21,24 +22,59 @@ public class Queries
         
         Log.Debug($"Upserting settings for {userId}");
 
-        var instance = Db.GetInstance();
-        var isNew = false;
-        var userSettings = await instance.UserSettings.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
-        if (userSettings is null)
+        // Upserts are read-modify-write on one row; run them one at a time so two quick preference
+        // changes from the same player cannot overwrite each other.
+        await UpsertLock.WaitAsync();
+        try
         {
-            userSettings = new UserSetting {UserId = userId};
-            await instance.UserSettings.AddAsync(userSettings);
-            isNew = true;
+            await using var db = Db.Create();
+            var userSettings = await db.UserSettings.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
+            var isNew = userSettings is null;
+            userSettings ??= new UserSetting {UserId = userId};
+
+            db.Entry(userSettings).State = isNew ? EntityState.Added : EntityState.Modified;
+
+            mutation(userSettings);
+
+            await db.SaveChangesAsync();
+
+            return userSettings;
         }
+        finally
+        {
+            UpsertLock.Release();
+        }
+    }
 
-        instance.Entry(userSettings).State = isNew ? EntityState.Added : EntityState.Modified;
+    private static readonly SemaphoreSlim UpsertLock = new(1, 1);
 
-        mutation(userSettings);
+    /// <summary>
+    /// For callers that start a write without awaiting it: logs a failure instead of leaving it unobserved.
+    /// </summary>
+    public static void LogFailure(Task task)
+    {
+        task.ContinueWith(
+            t => Log.Error($"Failed to save weapon preference: {t.Exception?.GetBaseException()}"),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+    }
 
-        await instance.SaveChangesAsync();
-        instance.Entry(userSettings).State = EntityState.Detached;
-
-        return userSettings;
+    // Preference writes are fire-and-forget from the game thread; log failures instead of losing them
+    // as unobserved task exceptions.
+    private static void RunInBackground(Func<Task> work)
+    {
+        Task.Run(async () =>
+        {
+            try
+            {
+                await work();
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Failed to save weapon preference: {e}");
+            }
+        });
     }
 
     public static async Task SetWeaponPreferenceForUserAsync(ulong userId, CsTeam team,
@@ -52,7 +88,7 @@ public class Queries
     public static void SetWeaponPreferenceForUser(ulong userId, CsTeam team, WeaponAllocationType weaponAllocationType,
         CsItem? item)
     {
-        Task.Run(async () => { await SetWeaponPreferenceForUserAsync(userId, team, weaponAllocationType, item); });
+        RunInBackground(() => SetWeaponPreferenceForUserAsync(userId, team, weaponAllocationType, item));
     }
 
     public static async Task ClearWeaponPreferencesForUserAsync(ulong userId)
@@ -62,7 +98,7 @@ public class Queries
 
     public static void ClearWeaponPreferencesForUser(ulong userId)
     {
-        Task.Run(async () => { await ClearWeaponPreferencesForUserAsync(userId); });
+        RunInBackground(() => ClearWeaponPreferencesForUserAsync(userId));
     }
 
     public static async Task SetPreferredWeaponPreferenceAsync(ulong userId, CsItem? item)
@@ -78,12 +114,13 @@ public class Queries
 
     public static void SetPreferredWeaponPreference(ulong userId, CsItem? item)
     {
-        Task.Run(async () => { await SetPreferredWeaponPreferenceAsync(userId, item); });
+        RunInBackground(() => SetPreferredWeaponPreferenceAsync(userId, item));
     }
 
     public static IDictionary<ulong, UserSetting> GetUsersSettings(ICollection<ulong> userIds)
     {
-        var userSettingsList = Db.GetInstance()
+        using var db = Db.Create();
+        var userSettingsList = db
             .UserSettings
             .AsNoTracking()
             .Where(u => userIds.Contains(u.UserId))
@@ -100,12 +137,14 @@ public class Queries
 
     public static void Migrate()
     {
-        Db.GetInstance().Database.Migrate();
+        using var db = Db.Create();
+        db.Database.Migrate();
     }
 
     public static void Wipe()
     {
-        Db.GetInstance().UserSettings.ExecuteDelete();
+        using var db = Db.Create();
+        db.UserSettings.ExecuteDelete();
     }
 
     public static void Disconnect()
