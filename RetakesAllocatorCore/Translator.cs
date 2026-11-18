@@ -1,5 +1,9 @@
 ﻿// Stolen from https://github.com/B3none/cs2-retakes/blob/014663222fa95bb9f506284814ae62205630416c/Modules/Translator.cs
 
+using System.Globalization;
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Translations;
 using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Localization;
 
@@ -32,6 +36,55 @@ public class Translator
     }
 
     public string this[string name] => Translate(name);
+
+    /// <summary>Translate into the player's own language (server language for null, bots and HLTV).</summary>
+    public string ForPlayer(CCSPlayerController? player, string name, params object[] arguments)
+    {
+        using (PlayerScope(player))
+        {
+            return Translate(name, arguments);
+        }
+    }
+
+    /// <summary>
+    /// Every translation made while the returned scope is alive (Translator and the plugin Localizer)
+    /// uses the player's language. Null, bots and HLTV keep the server language. Game thread only.
+    /// </summary>
+    public static IDisposable PlayerScope(CCSPlayerController? player)
+    {
+        if (player is null || !player.IsValid || player.IsBot || player.IsHLTV)
+        {
+            return NoScope.Instance;
+        }
+
+        return new WithTemporaryCulture(player.GetLanguage());
+    }
+
+    /// <summary>Same as PlayerScope, for a culture captured earlier (safe off the game thread).</summary>
+    public static IDisposable CultureScope(CultureInfo culture) => new WithTemporaryCulture(culture);
+
+    /// <summary>Run an action for every human player (no bots, no HLTV) inside that player's language scope.</summary>
+    public static void ForEachHuman(Action<CCSPlayerController> action)
+    {
+        foreach (var player in Utilities.GetPlayers())
+        {
+            if (!player.IsValid || player.IsBot || player.IsHLTV)
+            {
+                continue;
+            }
+
+            using (PlayerScope(player))
+            {
+                action(player);
+            }
+        }
+    }
+
+    private sealed class NoScope : IDisposable
+    {
+        public static readonly NoScope Instance = new();
+        public void Dispose() { }
+    }
 
     public string this[string name, params object[] arguments] => Translate(name, arguments);
 

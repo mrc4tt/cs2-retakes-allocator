@@ -1,4 +1,3 @@
-using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using RetakesAllocatorCore;
 using Timer = CounterStrikeSharp.API.Modules.Timers.Timer;
@@ -31,11 +30,11 @@ public abstract class AbstractVoteManager
         {
             _voteTimer = new Timer(VoteTimeout, CompleteVote);
 
-            PrintToServer($"A vote has been started! Type {_voteCommand} to vote!");
+            PrintToServer(() => Translator.Instance["vote.started", _voteCommand]);
         }
 
         _votes[player] = vote;
-        PrintToPlayer(player, "Your vote has been registered!");
+        PrintToPlayer(player, () => Translator.Instance["vote.registered"]);
     }
 
     public void CompleteVote()
@@ -83,7 +82,7 @@ public abstract class AbstractVoteManager
         var numPlayers = Helpers.GetNumPlayersOnTeam();
         if (numPlayers == 0 || (float) highestScore / numPlayers < EnoughPlayersVotedThreshold)
         {
-            PrintToServer("Vote failed: Not enough players voted!");
+            PrintToServer(() => Translator.Instance["vote.failed_not_enough"]);
             return;
         }
 
@@ -93,15 +92,21 @@ public abstract class AbstractVoteManager
         HandleVoteResult(chosenVote);
     }
 
-    public string VoteMessagePrefix => $"{PluginInfo.MessagePrefix}[Voting for {_voteFor}] ";
+    // _voteFor is a lang key; translated in the language scope of whoever sees the prefix.
+    public string VoteMessagePrefix =>
+        $"{PluginInfo.MessagePrefix}{Translator.Instance["vote.prefix", Translator.Instance[_voteFor]]}";
 
-    protected void PrintToPlayer(CCSPlayerController player, string message)
+    protected void PrintToPlayer(CCSPlayerController player, Func<string> message)
     {
-        player.PrintToChat($"{VoteMessagePrefix}{message}");
+        using (Translator.PlayerScope(player))
+        {
+            player.PrintToChat($"{VoteMessagePrefix}{message()}");
+        }
     }
 
-    protected void PrintToServer(string message)
+    // Each human player gets the message in their own language.
+    protected void PrintToServer(Func<string> message)
     {
-        Server.PrintToChatAll($"{VoteMessagePrefix}{message}");
+        Translator.ForEachHuman(player => player.PrintToChat($"{VoteMessagePrefix}{message()}"));
     }
 }

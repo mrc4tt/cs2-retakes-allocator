@@ -58,14 +58,19 @@ public class AdvancedGunMenu
         _ctPistolRound = BuildWeaponList(WeaponAllocationType.PistolRound, CsTeam.CounterTerrorist);
     }
 
-    // Cached menu chrome. Translator.Instance[...] takes no player argument, so every one of
-    // these is server-global and identical on every tick for every player. The old code did
+    // Cached menu chrome, one set per language (each player sees the menu in their own
+    // language). Within a language it is identical on every tick for every player. The old code did
     // ~30 dictionary lookups and allocated 4 string[] per player per tick; at 64 tick with a
     // handful of menus open that is thousands of gen0 allocations a second, which is what
     // turned into GC pauses and choke. Built once; InvalidateWeaponCache() drops them too so
     // a runtime config/translation reload still takes effect.
-    private string? _imageLeft, _imageRight, _bottomMenu, _bottomMenuOnPistol;
-    private string[]? _main, _tLoadout, _ctLoadout, _awp;
+    private sealed class MenuText
+    {
+        public string ImageLeft = "", ImageRight = "", BottomMenu = "", BottomMenuOnPistol = "";
+        public string[] Main = [], TLoadout = [], CtLoadout = [], Awp = [];
+    }
+
+    private readonly Dictionary<string, MenuText> _textCache = new();
 
     private static string Text(string key, string fallback = "")
     {
@@ -73,22 +78,26 @@ public class AdvancedGunMenu
         return string.IsNullOrEmpty(value) ? fallback : value;
     }
 
-    private void EnsureTextCache()
+    // Call inside the player's language scope (Translator.PlayerScope).
+    private MenuText GetTextCache()
     {
-        if (_main != null) return;
-        _imageLeft          = Text("menu.left.image");
-        _imageRight         = Text("menu.right.image");
-        _bottomMenu         = Text("menu.bottom.text");
-        _bottomMenuOnPistol = Text("menu.bottom.text.pistol");
+        var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+        if (_textCache.TryGetValue(culture, out var cached)) return cached;
 
-        _main = new[]
+        var t = new MenuText();
+        t.ImageLeft          = Text("menu.left.image");
+        t.ImageRight         = Text("menu.right.image");
+        t.BottomMenu         = Text("menu.bottom.text");
+        t.BottomMenuOnPistol = Text("menu.bottom.text.pistol");
+
+        t.Main = new[]
         {
             Text("menu.main.tloadout", "█░ T Loadout ░█"),
             Text("menu.main.ctloadout", "█░ CT Loadout ░█"),
             Text("menu.main.awp", "█░ AWP ░█"),
         };
 
-        _tLoadout = new[]
+        t.TLoadout = new[]
         {
             Text("menu.tprimary", "█ T Primary █"),
             Text("menu.tsecondary", "█ T Secondary █"),
@@ -96,7 +105,7 @@ public class AdvancedGunMenu
             Text("menu.tHalfbuy", "█ T Half Buy █"),
         };
 
-        _ctLoadout = new[]
+        t.CtLoadout = new[]
         {
             Text("menu.ctprimary", "█ CT Primary █"),
             Text("menu.ctsecondary", "█ CT Secondary █"),
@@ -104,17 +113,20 @@ public class AdvancedGunMenu
             Text("menu.ctHalfbuy", "█ CT Half Buy █"),
         };
 
-        _awp = new[]
+        t.Awp = new[]
         {
             Text("menu.awp.always", "Always"),
             Text("menu.awp.never", "Never"),
         };
+
+        _textCache[culture] = t;
+        return t;
     }
 
     public void InvalidateWeaponCache()
     {
         _tFullBuy = null;
-        _main = null;
+        _textCache.Clear();
     }
 
     // The menu HTML was sent on every tick (64 times a second) while open, even when nothing changed. Each
@@ -196,17 +208,7 @@ public class AdvancedGunMenu
         // scan so the menu costs zero when unused.
         if (menuon.Count == 0) return;
 
-        EnsureTextCache();
         EnsureWeaponCache();
-
-        string Imageleft = _imageLeft!;
-        string ImageRight = _imageRight!;
-        string BottomMenu = _bottomMenu!;
-        string BottomMenuOnpistol = _bottomMenuOnPistol!;
-        string[] Main = _main!;
-        string[] Tloadout = _tLoadout!;
-        string[] CTloadout = _ctLoadout!;
-        string[] AWP = _awp!;
 
         // Snapshot the ids: the draw loop below closes menus (and so mutates menuon) while
         // it runs, which would invalidate a live enumerator.
@@ -225,6 +227,18 @@ public class AdvancedGunMenu
                 continue;
             }
             if (!player.PawnIsAlive || player.IsBot || player.IsHLTV) continue;
+
+            // Menu chrome and chat replies below are in this player's language.
+            using var langScope = Translator.PlayerScope(player);
+            var text = GetTextCache();
+            string Imageleft = text.ImageLeft;
+            string ImageRight = text.ImageRight;
+            string BottomMenu = text.BottomMenu;
+            string BottomMenuOnpistol = text.BottomMenuOnPistol;
+            string[] Main = text.Main;
+            string[] Tloadout = text.TLoadout;
+            string[] CTloadout = text.CtLoadout;
+            string[] AWP = text.Awp;
 
             if (menuon.ContainsKey(playerid))
             {

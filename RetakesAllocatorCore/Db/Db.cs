@@ -9,17 +9,28 @@ public class Db : DbContext
 {
     public DbSet<UserSetting> UserSettings { get; set; }
 
-    private static Db? Instance { get; set; }
-
-    public static Db GetInstance()
+    /// <summary>
+    /// Creates a context for a single unit of work. A DbContext is not thread-safe and the queries run from
+    /// both the game thread and background tasks, so every operation gets its own short-lived instance.
+    /// The provider's connection pool makes this cheap. Callers must dispose it.
+    /// </summary>
+    public static Db Create()
     {
-        return Instance ??= new Db();
+        return new Db();
     }
 
     public static void Disconnect()
     {
-        Instance?.Dispose();
-        Instance = null;
+        // Contexts are disposed per operation; only the pooled connections are left to release.
+        try
+        {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            MySqlConnector.MySqlConnection.ClearAllPools();
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"Failed to clear database connection pools: {e.Message}");
+        }
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

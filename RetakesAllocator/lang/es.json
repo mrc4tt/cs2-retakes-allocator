@@ -102,5 +102,14 @@
   "admin_weapons.save_failed": "[RED]Could not save config.json:[NORMAL] {0}",
   "admin_weapons.empty_slot": "[YELLOW]Warning:[NORMAL] no {0} weapons left for {1}, so those players get none in that slot.",
   "admin_weapons.unknown_weapon": "Unknown weapon '{0}'.",
-  "admin_weapons.unknown_preset": "Unknown preset '{0}'. Available: {1}"
+  "admin_weapons.unknown_preset": "Unknown preset '{0}'. Available: {1}",
+
+  "command.player_only": "Este comando solo puede usarlo un jugador válido.",
+  "vote.disabled": "La votación de la siguiente ronda está desactivada.",
+  "vote.prefix": "[Votación de {0}] ",
+  "vote.for_next_round": "la siguiente ronda",
+  "vote.started": "¡Ha empezado una votación! Escribe {0} para votar.",
+  "vote.registered": "¡Tu voto ha sido registrado!",
+  "vote.failed_not_enough": "Votación fallida: ¡no votaron suficientes jugadores!",
+  "vote.complete_next_round": "¡Votación terminada! La siguiente ronda será {0}."
 }
